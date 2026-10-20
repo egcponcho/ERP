@@ -1,6 +1,11 @@
 #!/bin/sh
 # Arranque del contenedor: migraciones, configuración base (opcional) y servidor.
 set -e
+# Sin DATABASE_URL se usaría SQLite dentro del contenedor y los datos se perderían en cada despliegue
+if [ -z "$DATABASE_URL" ]; then
+  echo "Falta DATABASE_URL (la dirección de la base PostgreSQL)." >&2
+  exit 1
+fi
 alembic upgrade head
 # CARGAR_CONFIG_BASE=1: agrega las unidades, estados y tipos sugeridos que falten
 # (datos/base.json). No duplica ni pisa lo que ya existe.

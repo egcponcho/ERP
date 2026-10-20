@@ -47,15 +47,26 @@ Con PostgreSQL: `DATABASE_URL=postgresql+psycopg://usuario:clave@host/base`.
 
 ## En la nube (Render)
 
-El repositorio incluye `render.yaml`, que crea la base PostgreSQL y el servicio web desde el `Dockerfile`.
+El repositorio incluye `render.yaml`, que crea el servicio web desde el `Dockerfile`. **No crea la base de datos**, porque Render permite una sola base gratuita por cuenta. La base se indica en `DATABASE_URL`.
+
+**1. Prepare la base.** Si ya tiene una instancia PostgreSQL en Render (por ejemplo, la de `facturacion`), cree dentro de ella una base aparte para el ERP. Así no se mezcla con las tablas de la otra aplicación:
+
+1. En el panel de esa base, en **Connect**, copie el comando **PSQL Command** (o la **External Database URL**).
+2. Ejecútelo en una terminal con `psql` instalado y escriba: `CREATE DATABASE erp;`
+3. Tome la **Internal Database URL** de la instancia y cambie el nombre de la base del final por `erp`. Ejemplo: `postgresql://usuario:clave@dpg-xxxx-a/facturas` → `postgresql://usuario:clave@dpg-xxxx-a/erp`.
+
+También sirve cualquier otra base PostgreSQL (una instancia pagada de Render, Neon, Supabase…).
+
+**2. Cree el servicio.**
 
 1. Entre a https://dashboard.render.com/blueprints y haga clic en **New Blueprint Instance**.
 2. Conecte GitHub, elija este repositorio y la rama que quiere desplegar.
-3. Haga clic en **Apply**. En unos minutos queda en línea en `https://erp-XXXX.onrender.com`; la raíz abre la documentación interactiva de la API (`/docs`).
+3. Render pide `DATABASE_URL`: pegue la dirección del paso 1.
+4. Haga clic en **Apply**. En unos minutos queda en línea en `https://erp-XXXX.onrender.com`; la raíz abre la documentación interactiva de la API (`/docs`).
 
 Al arrancar, el contenedor (`backend/arrancar.sh`) aplica las migraciones y, con `CARGAR_CONFIG_BASE=1`, agrega la configuración sugerida que falte. Si borra a propósito algo de esa configuración y no quiere que vuelva al reiniciar, cambie `CARGAR_CONFIG_BASE` a `0` en Render (*Environment*).
 
-Límites del plan gratuito: el servicio se duerme tras 15 minutos sin uso (la primera petición tarda cerca de un minuto) y la base gratuita vence a los 30 días.
+Límites del plan gratuito: el servicio se duerme tras 15 minutos sin uso (la primera petición tarda cerca de un minuto) y la base gratuita vence a los 30 días. Si la base del ERP está dentro de la instancia de otra aplicación, comparte con ella el vencimiento, el espacio (1 GB) y los respaldos.
 
 ## Pruebas
 
