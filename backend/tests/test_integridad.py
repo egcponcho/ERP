@@ -110,3 +110,12 @@ def test_migraciones_coinciden_con_los_modelos(tmp_path):
     command.upgrade(cfg, "head")
     command.check(cfg)  # falla si los modelos tienen cambios sin migración
     command.downgrade(cfg, "base")
+
+
+def test_url_de_la_plataforma_usa_psycopg():
+    from app.core.config import url_base_datos
+
+    assert url_base_datos("postgres://u:c@h/b") == "postgresql+psycopg://u:c@h/b"
+    assert url_base_datos("postgresql://u:c@h/b") == "postgresql+psycopg://u:c@h/b"
+    assert url_base_datos("postgresql+psycopg://u@h/b") == "postgresql+psycopg://u@h/b"
+    assert url_base_datos("sqlite:///./erp.db") == "sqlite:///./erp.db"

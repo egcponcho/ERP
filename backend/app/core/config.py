@@ -2,8 +2,17 @@
 import os
 
 
+def url_base_datos(url: str) -> str:
+    """La URL con el controlador psycopg 3: las plataformas (Render, Railway…) la dan
+    como postgres:// o postgresql://, que SQLAlchemy asociaría a psycopg2."""
+    for prefijo in ("postgres://", "postgresql://"):
+        if url.startswith(prefijo):
+            return "postgresql+psycopg://" + url[len(prefijo):]
+    return url
+
+
 class Config:
-    DATABASE_URL: str = os.environ.get("DATABASE_URL", "sqlite:///./erp.db").replace("postgres://", "postgresql+psycopg://", 1)
+    DATABASE_URL: str = url_base_datos(os.environ.get("DATABASE_URL", "sqlite:///./erp.db"))
     # Organización con la que trabaja la API mientras no exista el módulo de acceso
     ORGANIZACION_POR_DEFECTO: int = int(os.environ.get("ORGANIZACION_POR_DEFECTO", "1"))
 

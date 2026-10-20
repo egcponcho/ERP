@@ -45,6 +45,18 @@ uvicorn app.main:app --reload                  # API en http://localhost:8000, d
 
 Con PostgreSQL: `DATABASE_URL=postgresql+psycopg://usuario:clave@host/base`.
 
+## En la nube (Render)
+
+El repositorio incluye `render.yaml`, que crea la base PostgreSQL y el servicio web desde el `Dockerfile`.
+
+1. Entre a https://dashboard.render.com/blueprints y haga clic en **New Blueprint Instance**.
+2. Conecte GitHub, elija este repositorio y la rama que quiere desplegar.
+3. Haga clic en **Apply**. En unos minutos queda en línea en `https://erp-XXXX.onrender.com`; la raíz abre la documentación interactiva de la API (`/docs`).
+
+Al arrancar, el contenedor (`backend/arrancar.sh`) aplica las migraciones y, con `CARGAR_CONFIG_BASE=1`, agrega la configuración sugerida que falte. Si borra a propósito algo de esa configuración y no quiere que vuelva al reiniciar, cambie `CARGAR_CONFIG_BASE` a `0` en Render (*Environment*).
+
+Límites del plan gratuito: el servicio se duerme tras 15 minutos sin uso (la primera petición tarda cerca de un minuto) y la base gratuita vence a los 30 días.
+
 ## Pruebas
 
 ```bash

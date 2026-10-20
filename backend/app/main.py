@@ -1,7 +1,7 @@
 """Aplicación FastAPI: rutas de los módulos y errores como {mensaje, codigo, detalle}."""
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm.exc import StaleDataError
 
 from app.core.errores import ErrorNegocio
@@ -28,6 +28,12 @@ def _concurrencia(_request: Request, _exc: StaleDataError):
 def _validacion(_request: Request, exc: RequestValidationError):
     detalle = [{"campo": ".".join(str(x) for x in err["loc"][1:]), "mensaje": err["msg"]} for err in exc.errors()]
     return JSONResponse({"mensaje": "Revise los datos.", "codigo": "validacion", "detalle": detalle}, status_code=422)
+
+
+@app.get("/", include_in_schema=False)
+def inicio():
+    # Mientras no haya interfaz, la raíz lleva a la documentación interactiva de la API
+    return RedirectResponse("/docs")
 
 
 @app.get("/api/salud")

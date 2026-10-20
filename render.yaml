@@ -1,0 +1,27 @@
+# Blueprint de Render: https://render.com/docs/blueprint-spec
+# Crea la base PostgreSQL y el servicio web (la API) desde el Dockerfile.
+# Al arrancar se aplican las migraciones y, con CARGAR_CONFIG_BASE=1, la
+# configuración sugerida de productos (unidades, estados, tipos de identificador y de relación).
+databases:
+  - name: erp-db
+    plan: free
+    databaseName: erp
+    user: erp
+
+services:
+  - type: web
+    name: erp
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/salud
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: erp-db
+          property: connectionString
+      - key: CARGAR_CONFIG_BASE
+        value: "1"
+      # Render atiende detrás de su propio proxy
+      - key: FORWARDED_ALLOW_IPS
+        value: "*"
