@@ -88,6 +88,29 @@ El repositorio incluye `railway.json`: Railway compila el `Dockerfile` (interfaz
 
 Cada push a la rama elegida se despliega solo. Al arrancar se aplican las migraciones y se carga la configuración sugerida que falte.
 
+## En la nube (Fly.io)
+
+El repositorio incluye `fly.toml`: Fly compila el `Dockerfile` (interfaz + API) y revisa `/api/salud`. La máquina se apaga sola cuando no hay tráfico y se enciende con la primera petición. La primera tarda unos segundos.
+
+**1. Cree la aplicación** (una sola vez, en su computadora):
+
+```bash
+# Instalar flyctl: https://fly.io/docs/flyctl/install/
+fly auth login
+fly launch --copy-config --no-deploy    # usa este fly.toml; elija un nombre libre y la región
+```
+
+`fly launch` reescribe `app` y `primary_region` en `fly.toml` con lo que elija: súbalo al repositorio.
+
+**2. La base de datos.** El ERP necesita PostgreSQL en `DATABASE_URL`:
+
+- **Postgres administrado de Fly** (de pago, desde unos 38 USD al mes): créelo y conéctelo a la aplicación siguiendo https://fly.io/docs/mpg/ (con flyctl: `fly mpg create` y `fly mpg attach`). Al conectarlo, Fly guarda `DATABASE_URL` como secreto de la aplicación.
+- **Otra base PostgreSQL** (Neon o Supabase tienen planes gratuitos, o la de Render o Railway): `fly secrets set DATABASE_URL="postgresql://usuario:clave@host/base?sslmode=require"`.
+
+**3. Despliegue:** `fly deploy`. Queda en `https://<nombre>.fly.dev`. Al arrancar se aplican las migraciones y se carga la configuración sugerida que falte (`CARGAR_CONFIG_BASE` en `fly.toml`).
+
+**Despliegue automático desde GitHub** (`.github/workflows/fly.yml`): cada push a `productos-base` o `main` despliega en Fly.io. Para activarlo, genere un token con `fly tokens create deploy -x 999999h` (copie todo, incluido `FlyV1 `) y guárdelo en GitHub → *Settings → Secrets and variables → Actions* con el nombre `FLY_API_TOKEN`. Sin ese secreto, el flujo no hace nada.
+
 ## En la nube (Render)
 
 El repositorio incluye `render.yaml`, que crea el servicio web desde el `Dockerfile`. **No crea la base de datos**, porque Render permite una sola base gratuita por cuenta. La base se indica en `DATABASE_URL`.
