@@ -1,0 +1,22 @@
+# Blueprint de Render: https://render.com/docs/blueprint-spec
+# Crea el servicio web (la API) desde el Dockerfile. NO crea base de datos: Render
+# permite una sola base gratuita por cuenta, así que DATABASE_URL se indica al
+# aplicar el blueprint (p. ej. una base "erp" creada dentro de una instancia
+# PostgreSQL existente con CREATE DATABASE erp; ver README).
+# Al arrancar se aplican las migraciones y, con CARGAR_CONFIG_BASE=1, la
+# configuración sugerida de productos (unidades, estados, tipos de identificador y de relación).
+services:
+  - type: web
+    name: erp
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/salud
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: CARGAR_CONFIG_BASE
+        value: "1"
+      # Render atiende detrás de su propio proxy
+      - key: FORWARDED_ALLOW_IPS
+        value: "*"
