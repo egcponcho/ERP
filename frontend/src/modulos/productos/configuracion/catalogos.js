@@ -71,21 +71,35 @@ export const CATALOGOS = {
   },
 }
 
-// Apartados del menú de configuración
+// Apartados de la configuración, agrupados por para qué sirven y en el orden en que conviene
+// configurarlos. `fuente`: catálogo del que sale la cuenta de registros.
 export const APARTADOS = [
-  { grupo: 'Productos', items: [
-    { ruta: 'tipos', nombre: 'Tipos de producto', icono: 'capas' },
-    { ruta: 'atributos', nombre: 'Características', icono: 'etiqueta' },
-    { ruta: 'grupos-atributo', nombre: 'Secciones de la ficha', icono: 'lista' },
-    { ruta: 'categorias', nombre: 'Categorías', icono: 'arbol' },
+  { grupo: 'Estructura de los productos', items: [
+    { ruta: 'tipos', fuente: 'tipos-producto', nombre: 'Tipos de producto', icono: 'capas',
+      texto: 'Qué datos pide cada clase de producto, cuáles distinguen variantes y cómo se numera.' },
+    { ruta: 'atributos', fuente: 'atributos', nombre: 'Características', icono: 'etiqueta',
+      texto: 'Los datos que se capturan (color, talla, peso, material…) con su tipo y sus reglas.' },
+    { ruta: 'grupos-atributo', fuente: 'grupos-atributo', nombre: 'Secciones de la ficha', icono: 'lista',
+      texto: 'Agrupan las características en la ficha: Dimensiones, Seguridad, Datos técnicos…' },
   ] },
-  { grupo: 'Medidas y estados', items: [
-    { ruta: 'unidades', nombre: 'Unidades', icono: 'regla' },
-    { ruta: 'magnitudes', nombre: 'Magnitudes', icono: 'escala' },
-    { ruta: 'estados', nombre: 'Estados', icono: 'bandera' },
+  { grupo: 'Clasificación', items: [
+    { ruta: 'categorias', fuente: 'categorias', nombre: 'Categorías', icono: 'arbol',
+      texto: 'Árboles para agrupar productos: línea comercial, familia contable, canal de venta…' },
+  ] },
+  { grupo: 'Medidas', items: [
+    { ruta: 'unidades', fuente: 'unidades', nombre: 'Unidades', icono: 'regla',
+      texto: 'En qué se cuentan y miden los productos (pieza, par, kg, litro) y cómo se convierten.' },
+    { ruta: 'magnitudes', fuente: 'magnitudes', nombre: 'Magnitudes', icono: 'escala',
+      texto: 'Lo que se mide: masa, volumen, longitud… Agrupa las unidades convertibles entre sí.' },
+  ] },
+  { grupo: 'Ciclo de vida', items: [
+    { ruta: 'estados', fuente: 'estados', nombre: 'Estados', icono: 'bandera',
+      texto: 'Borrador, Activo, Descontinuado… cuáles exigen ficha completa y a cuáles se puede pasar.' },
   ] },
   { grupo: 'Códigos y vínculos', items: [
-    { ruta: 'tipos-identificador', nombre: 'Tipos de código', icono: 'codigo' },
-    { ruta: 'tipos-relacion', nombre: 'Tipos de relación', icono: 'enlace' },
+    { ruta: 'tipos-identificador', fuente: 'tipos-identificador', nombre: 'Tipos de código', icono: 'codigo',
+      texto: 'Códigos alternos: EAN, UPC, código del proveedor, CAS…' },
+    { ruta: 'tipos-relacion', fuente: 'tipos-relacion', nombre: 'Tipos de relación', icono: 'enlace',
+      texto: 'Vínculos entre productos: componentes, sustitutos, accesorios…' },
   ] },
 ]

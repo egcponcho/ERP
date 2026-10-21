@@ -16,7 +16,7 @@ const ES = {
   'Save the filters you use often to come back to them in one click.': 'Guarde los filtros que usa seguido para volver a ellos con un clic.',
   'Delete view {0}': 'Borrar la vista {0}', 'Save current filters as a view': 'Guardar los filtros actuales como vista',
   'View “{0}” saved.': 'Vista «{0}» guardada.', 'View “{0}” deleted.': 'Vista «{0}» borrada.', 'Name of the view': 'Nombre de la vista',
-  'Step {0} of {1}': 'Paso {0} de {1}', 'Close the assistant': 'Cerrar el asistente', Progress: 'Avance', Steps: 'Pasos',
+  'Step {0} of {1}': 'Paso {0} de {1}', 'Close the assistant': 'Salir del asistente (el borrador queda guardado)', Exit: 'Salir', Progress: 'Avance', Steps: 'Pasos',
   '(needs attention)': '(necesita atención)', Back: 'Atrás', 'Save draft': 'Guardar borrador', Next: 'Siguiente', Finish: 'Terminar',
   Save: 'Guardar', Cancel: 'Cancelar', 'Clear selection': 'Quitar selección', 'Actions on the selection': 'Acciones sobre la selección',
 }

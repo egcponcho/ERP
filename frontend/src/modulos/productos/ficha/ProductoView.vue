@@ -7,7 +7,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { api, CONFIG } from '@/nucleo/api.js'
 import { avisar, avisarError } from '@/nucleo/avisos.js'
 import { catalogo } from '@/nucleo/catalogos.js'
-import { fecha } from '@/nucleo/formato.js'
+import { claseEstado, fecha } from '@/nucleo/formato.js'
+import { fijarTitulo } from '@/nucleo/migas.js'
 import BotonConfirmar from '@/componentes/BotonConfirmar.vue'
 import Icono from '@/componentes/Icono.vue'
 import PanelEnLinea from '@/componentes/PanelEnLinea.vue'
@@ -40,6 +41,7 @@ async function cargar() {
     const [e, u, s, d] = await Promise.all([api.get(`${CONFIG}/tipos-producto/${p.tipo.id}/esquema`), catalogo('unidades'),
       catalogo('estados', { recargar: true }), api.get(`${CONFIG}/estados/${p.estado.id}/transiciones`)])
     ;[producto.value, esquema.value, unidades.value, estados.value, destinos.value] = [p, e, u, s, d]
+    fijarTitulo(p.nombre)
   } catch (e) {
     if (e.status === 404) noExiste.value = true
     else avisarError(e)
@@ -62,7 +64,6 @@ const pestanas = computed(() => {
 const estadoActual = computed(() => estados.value.find((e) => e.id === producto.value?.estado.id))
 const siguientes = computed(() => estados.value.filter((e) => e.activo && e.id !== producto.value?.estado.id
   && (!destinos.value.length || destinos.value.includes(e.id))))
-const tono = (e) => (e?.operable ? 'estado-ok' : e?.inicial ? 'estado-info' : 'estado-neutro')
 
 async function cambiarEstado(e) {
   menuEstado.value = false
@@ -90,7 +91,7 @@ async function borrar() {
   try {
     await api.del(`/productos/${props.id}`)
     avisar(`Se borró ${producto.value.codigo}.`)
-    router.push('/productos')
+    router.push('/productos/catalogo')
   } catch (e) { avisarError(e) }
 }
 </script>
@@ -98,18 +99,17 @@ async function borrar() {
 <template>
   <div>
     <template v-if="producto && esquema">
-      <RouterLink to="/productos" class="volver"><Icono nombre="atras" :tam="14" />Catálogo</RouterLink>
       <header class="doc-cabeza">
         <div class="doc-fila">
           <span class="doc-numero mono">{{ producto.codigo }}</span>
           <div class="estado-menu" @keydown.esc="menuEstado = false">
-            <button type="button" class="estado boton-estado" :class="tono(estadoActual)" :aria-expanded="menuEstado" aria-haspopup="menu"
+            <button type="button" class="estado boton-estado" :class="claseEstado(estadoActual)" :aria-expanded="menuEstado" aria-haspopup="menu"
                     :disabled="!siguientes.length" :title="siguientes.length ? 'Cambiar estado' : ''" @click="menuEstado = !menuEstado">
               <span class="estado-marca" />{{ producto.estado.nombre }}<Icono v-if="siguientes.length" nombre="abajo" :tam="12" /></button>
             <div v-if="menuEstado" v-flotante class="menu-estado" role="menu">
               <p class="ayuda">Pasar a</p>
               <button v-for="e in siguientes" :key="e.id" type="button" role="menuitem" @click="cambiarEstado(e)">
-                <span class="estado" :class="tono(e)"><span class="estado-marca" />{{ e.nombre }}</span>
+                <span class="estado" :class="claseEstado(e)"><span class="estado-marca" />{{ e.nombre }}</span>
                 <small v-if="e.exige_completo" class="ayuda">exige ficha completa</small>
               </button>
             </div>
@@ -155,7 +155,7 @@ async function borrar() {
       </div>
     </template>
     <div v-else-if="noExiste" class="panel">
-      <h2>Este producto no existe</h2><p class="ayuda mt-chico">Puede que se haya borrado. <RouterLink to="/productos">Volver al catálogo</RouterLink></p>
+      <h2>Este producto no existe</h2><p class="ayuda mt-chico">Puede que se haya borrado. <RouterLink to="/productos/catalogo">Volver al catálogo</RouterLink></p>
     </div>
     <div v-else class="doc-cabeza" aria-busy="true"><span class="esqueleto" style="width: 220px; height: 26px" /><span class="esqueleto mt-chico" style="width: 320px; height: 14px" /></div>
   </div>

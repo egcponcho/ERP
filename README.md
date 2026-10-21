@@ -27,9 +27,12 @@ backend/
     main.py
   alembic/         Migraciones
   tests/           Pruebas de punta a punta por rubro
+frontend/          Interfaz en Vue 3 (modulos/inicio, modulos/productos)
+design-system/erp/ Sistema de diseño (UI UX Pro Max)
 docs/
   AUDITORIA_PRODUCTOS.md   Qué se tomó de facturacion y qué no
   PRODUCTOS.md             Diseño del módulo de productos
+  GUIA_PRODUCTOS.md        Cómo funciona y cómo se usa, pantalla por pantalla
 ```
 
 ## Cómo empezar
@@ -59,13 +62,14 @@ Con PostgreSQL: `DATABASE_URL=postgresql+psycopg://usuario:clave@host/base`.
 
 ### Interfaz
 
-Vue 3 + Vite, sin librerías de componentes. Usa el **mismo sistema visual y las mismas piezas que `facturacion`**: estilos, marco, tabla común (`TablaDatos`: orden y filtro por columna como en Excel, columnas, densidad, vistas guardadas, detalle desplegable, paginación) y asistente por pasos. Casi no hay ventanas emergentes: los formularios se abren dentro de la página (`PanelEnLinea`), las filas se editan al desplegarlas y las bajas se confirman en el mismo botón (`BotonConfirmar`).
+Vue 3 + Vite, sin librerías de componentes. El sistema de diseño se armó con la skill **UI UX Pro Max** y está en [design-system/erp/MASTER.md](design-system/erp/MASTER.md): estilo sobrio para herramientas de trabajo, azul marino y azul de acción, Plus Jakarta Sans, contraste AA, foco visible y objetivos táctiles de 44 px. Las piezas de tabla son las de `facturacion` (`TablaDatos`: orden y filtro por columna como en Excel, columnas, densidad, vistas guardadas, detalle desplegable, paginación). Casi no hay ventanas emergentes: los formularios se abren dentro de la página (`PanelEnLinea`), las filas se editan al desplegarlas y las bajas se confirman en el mismo botón (`BotonConfirmar`).
 
-Todo vive en un solo módulo, **Productos**, con tres apartados:
+El menú lateral tiene **una entrada por módulo**, para que no se sature cuando se agreguen más. Inicio es el tablero general. **Productos** lleva todo adentro, en pestañas, con «Nuevo producto» siempre a la vista. Cómo se usa cada pantalla: [docs/GUIA_PRODUCTOS.md](docs/GUIA_PRODUCTOS.md).
 
-- **Catálogo** (`modulos/productos/CatalogoView.vue`): la tabla común en modo servidor, con búsqueda, categoría y filtros por cualquier característica. Cada producto abre su ficha (`ficha/`) con pestañas: ficha, variantes, presentaciones, códigos, relaciones y revisiones.
+- **Resumen** (`modulos/productos/resumen/`): el tablero del módulo (`GET /api/productos/resumen`). Muestra la puesta en marcha mientras falte configuración, las cifras, los productos por estado y por tipo, lo que falta completar y lo último modificado. Cada cifra abre el catálogo filtrado.
+- **Catálogo** (`modulos/productos/catalogo/`): la tabla común en modo servidor, con búsqueda, categoría, filtros por cualquier característica y pendientes (`?pendiente=sin_codigos`). Cada producto abre su ficha (`ficha/`) con pestañas: ficha, variantes, presentaciones, códigos, relaciones y revisiones.
 - **Nuevo producto** (`modulos/productos/asistente/`): asistente paso a paso con el tipo de producto (que se puede crear ahí mismo, con características nuevas), los datos generales, las características, las variantes (combinaciones con vista previa), el empaque y los códigos, las categorías y una revisión final. La revisión valida todo en el servidor sin guardar y muestra los códigos y SKU reales. El borrador se guarda solo en el navegador y el alta completa se guarda en una sola transacción (`POST /api/productos/asistente`).
-- **Configuración** (`modulos/productos/configuracion/`): menú lateral de apartados. Tiene tipos de producto (con herencia y vista previa de la ficha), características, secciones, categorías, unidades, magnitudes, estados, tipos de código y de relación. Cada catálogo muestra el formulario al lado de la tabla.
+- **Configuración** (`modulos/productos/configuracion/`): una portada con los apartados agrupados por para qué sirven y cuántos registros tiene cada uno; dentro de cada apartado, un menú lateral. Tiene tipos de producto (con herencia y vista previa de la ficha), características, secciones, categorías, unidades, magnitudes, estados, tipos de código y de relación. Cada catálogo muestra el formulario al lado de la tabla.
 
 `componentes/CampoAtributo.vue` dibuja el control de cualquier característica según su tipo de dato: ninguna pantalla conoce los atributos de un rubro.
 

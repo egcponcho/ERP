@@ -1,6 +1,6 @@
 <script setup>
 import { t, tx } from '@/nucleo/texto.js'
-import { computed } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import Icono from './Icono.vue'
 
 // Asistente por pasos: «Paso N de M», barra de avance, la lista de pasos (se
@@ -21,6 +21,9 @@ const emit = defineEmits(['ir', 'anterior', 'siguiente', 'guardar', 'finalizar',
 const ultimo = computed(() => props.actual === props.pasos.length - 1)
 const paso = computed(() => props.pasos[props.actual] || {})
 const porcentaje = computed(() => Math.round(((props.actual + 1) * 100) / props.pasos.length))
+// Al cambiar de paso, el foco va al título del paso (lo anuncia el lector de pantalla)
+const titulo = ref(null)
+watch(() => props.actual, async () => { await nextTick(); titulo.value?.focus({ preventScroll: true }) })
 const marca = (p, i) => (i === props.actual ? 'actual' : p.errores ? 'error' : p.completo ? 'completo' : '')
 </script>
 
@@ -29,10 +32,10 @@ const marca = (p, i) => (i === props.actual ? 'actual' : p.errores ? 'error' : p
     <header class="as-cabeza">
       <div class="as-titulos">
         <span class="eyebrow">{{ t('Step {0} of {1}', [actual + 1, pasos.length]) }}<template v-if="documento"> · {{ tx(documento) }}</template></span>
-        <h1>{{ tx(paso.titulo) }}</h1>
+        <h1 ref="titulo" tabindex="-1">{{ tx(paso.titulo) }}</h1>
       </div>
       <span class="as-guardado" role="status" aria-live="polite">{{ tx(guardado) }}</span>
-      <button type="button" class="btn-icono as-cerrar" :aria-label="t('Close the assistant')" @click="emit('cerrar')"><Icono nombre="cerrar" :tam="20" /></button>
+      <button type="button" class="btn btn-fantasma as-cerrar" :title="t('Close the assistant')" @click="emit('cerrar')"><Icono nombre="cerrar" :tam="18" />{{ t('Exit') }}</button>
     </header>
     <div class="as-barra" role="progressbar" :aria-label="t('Progress')" aria-valuemin="1" :aria-valuemax="pasos.length" :aria-valuenow="actual + 1">
       <div :style="{ width: `${porcentaje}%` }"></div>
@@ -69,6 +72,7 @@ const marca = (p, i) => (i === props.actual ? 'actual' : p.errores ? 'error' : p
 .as-cabeza { display: flex; align-items: flex-start; gap: 12px; }
 .as-titulos { flex: 1; min-width: 0; }
 .as-titulos h1 { margin: 2px 0 0; }
+.as-titulos h1:focus { outline: none; }
 .as-guardado { color: var(--tinta-3); font-size: 0.84rem; white-space: nowrap; align-self: center; }
 .as-barra { height: 4px; border-radius: 4px; background: var(--linea-suave); overflow: hidden; }
 .as-barra > div { height: 100%; background: var(--acento); transition: width 0.2s ease-out; }

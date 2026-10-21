@@ -1,13 +1,14 @@
 <script setup>
 // Catálogo: la tabla común (la misma de facturacion) en modo servidor. Cada
-// columna ordena y se filtra por sus valores; además, búsqueda, categoría y
-// filtros por cualquier característica («Más filtros»).
+// columna ordena y se filtra por sus valores; además, búsqueda, categoría,
+// filtros por cualquier característica («Más filtros») y los pendientes que
+// manda el resumen del módulo (?pendiente=sin_codigos…).
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api } from '@/nucleo/api.js'
 import { avisarError } from '@/nucleo/avisos.js'
 import { catalogo } from '@/nucleo/catalogos.js'
-import { fecha } from '@/nucleo/formato.js'
+import { claseEstado, fecha } from '@/nucleo/formato.js'
 import EstadoVacio from '@/componentes/EstadoVacio.vue'
 import Icono from '@/componentes/Icono.vue'
 import TablaDatos from '@/componentes/TablaDatos.vue'
@@ -21,7 +22,8 @@ const total = ref(0)
 const cargando = ref(true)
 const hayProductos = ref(true)
 const tabla = ref(null)
-const ext = reactive({ q: '', categoria_id: '' }) // filtros propios de la pantalla (se guardan en las vistas)
+const ext = reactive({ q: '', categoria_id: '', pendiente: route.query.pendiente || '' }) // filtros propios de la pantalla (se guardan en las vistas)
+const PENDIENTES = { sin_codigos: 'Sin códigos', sin_presentaciones: 'Sin presentaciones', sin_categorias: 'Sin categoría' }
 const porAtributo = ref([]) // [{ clave: 'a.peso__min', texto }]
 const nuevoFiltro = ref({ codigo: '', operador: '', valor: '' })
 const categorias = ref([])
@@ -41,7 +43,7 @@ const COLUMNAS = [
 
 const paramsAtributos = () => Object.fromEntries(porAtributo.value.map((f) => [f.clave, f.valor]))
 function parametros(c) {
-  return { q: ext.q, categoria_id: ext.categoria_id, ...paramsAtributos(), ...(c ? { orden: c.orden || 'codigo', pagina: c.page, tamano: c.size } : {}),
+  return { q: ext.q, categoria_id: ext.categoria_id, pendiente: ext.pendiente, ...paramsAtributos(), ...(c ? { orden: c.orden || 'codigo', pagina: c.page, tamano: c.size } : {}),
     ...Object.fromEntries(Object.entries(c?.filtros || ultima?.filtros || {})) }
 }
 
@@ -52,14 +54,14 @@ async function consultar(c) {
     const r = await api.get('/productos', parametros(c))
     filas.value = r.datos
     total.value = r.total
-    if (!r.total && !Object.keys(c.filtros).length && !ext.q && !ext.categoria_id && !porAtributo.value.length) hayProductos.value = false
+    if (!r.total && !Object.keys(c.filtros).length && !ext.q && !ext.categoria_id && !ext.pendiente && !porAtributo.value.length) hayProductos.value = false
     else hayProductos.value = true
   } catch (e) { avisarError(e) } finally { cargando.value = false }
 }
 const reconsultar = () => ultima && consultar({ ...ultima, page: 1 })
 
 async function valores(clave, q, otros) {
-  return api.get(`/productos/valores/${clave}`, { buscar: q, q: ext.q, categoria_id: ext.categoria_id, ...paramsAtributos(), ...otros })
+  return api.get(`/productos/valores/${clave}`, { buscar: q, q: ext.q, categoria_id: ext.categoria_id, pendiente: ext.pendiente, ...paramsAtributos(), ...otros })
 }
 
 function buscar() {
@@ -88,26 +90,30 @@ function agregarFiltro() {
 }
 
 const chips = computed(() => [
+  ...(ext.pendiente ? [{ clave: 'pendiente', texto: PENDIENTES[ext.pendiente] || ext.pendiente }] : []),
   ...(ext.categoria_id ? [{ clave: 'categoria_id', texto: `Categoría: ${rutaCategoria(categorias.value.find((c) => c.id === Number(ext.categoria_id)))}` }] : []),
   ...porAtributo.value.map((f) => ({ clave: f.clave, texto: f.texto })),
 ])
 function quitarExterno(clave) {
   if (clave === 'categoria_id') ext.categoria_id = ''
+  else if (clave === 'pendiente') { ext.pendiente = ''; router.replace({ query: { ...route.query, pendiente: undefined } }) }
   else porAtributo.value = porAtributo.value.filter((f) => f.clave !== clave)
   reconsultar()
 }
 function limpiarExternos() {
   ext.q = ''
   ext.categoria_id = ''
+  ext.pendiente = ''
   porAtributo.value = []
   reconsultar()
 }
 function aplicarVista(externos) {
   ext.q = externos.q || ''
   ext.categoria_id = externos.categoria_id || ''
+  ext.pendiente = externos.pendiente || ''
   porAtributo.value = JSON.parse(externos._atributos || '[]')
 }
-const externos = computed(() => ({ q: ext.q, categoria_id: ext.categoria_id, _atributos: porAtributo.value.length ? JSON.stringify(porAtributo.value) : '' }))
+const externos = computed(() => ({ q: ext.q, categoria_id: ext.categoria_id, pendiente: ext.pendiente, _atributos: porAtributo.value.length ? JSON.stringify(porAtributo.value) : '' }))
 
 function rutaCategoria(c) {
   const r = []
@@ -115,7 +121,6 @@ function rutaCategoria(c) {
   while (x) { r.unshift(x.nombre); x = categorias.value.find((p) => p.id === x.padre_id) }
   return r.join(' › ')
 }
-const tono = (f) => (f.operable ? 'estado-ok' : f.estado === 'BORRADOR' ? 'estado-info' : 'estado-neutro')
 </script>
 
 <template>
@@ -123,10 +128,7 @@ const tono = (f) => (f.operable ? 'estado-ok' : f.estado === 'BORRADOR' ? 'estad
     <header class="pagina-cabeza">
       <div>
         <h1>Catálogo de productos</h1>
-        <p>Todos los productos de cualquier rubro. Ordene y filtre desde cada columna, o por cualquier característica en «Más filtros».</p>
-      </div>
-      <div class="acciones">
-        <RouterLink class="btn btn-primario" to="/productos/nuevo"><Icono nombre="mas" :tam="16" />Nuevo producto</RouterLink>
+        <p>Busque por código, nombre o SKU. Ordene y filtre desde el encabezado de cada columna; para filtrar por una característica use «Más filtros».</p>
       </div>
     </header>
 
@@ -137,7 +139,7 @@ const tono = (f) => (f.operable ? 'estado-ok' : f.estado === 'BORRADOR' ? 'estad
       <template #barra>
         <label class="buscador">
           <Icono nombre="buscar" :tam="16" />
-          <input v-model="ext.q" class="entrada" type="search" placeholder="Buscar por código, nombre o SKU" aria-label="Buscar productos" @input="buscar" />
+          <input v-model="ext.q" class="entrada" type="search" placeholder="Código, nombre o SKU" aria-label="Buscar productos" @input="buscar" />
         </label>
       </template>
       <template #filtros>
@@ -170,7 +172,7 @@ const tono = (f) => (f.operable ? 'estado-ok' : f.estado === 'BORRADOR' ? 'estad
       <template #celda-codigo="{ fila }"><strong class="codigo">{{ fila.codigo }}</strong></template>
       <template #celda-nombre="{ fila }"><RouterLink :to="`/productos/${fila.id}`" class="enlace-doc principal-celda" @click.stop>{{ fila.nombre }}</RouterLink></template>
       <template #celda-tipo="{ fila }">{{ fila.tipo_nombre }}</template>
-      <template #celda-estado="{ fila }"><span class="estado" :class="tono(fila)"><span class="estado-marca" />{{ fila.estado_nombre }}</span></template>
+      <template #celda-estado="{ fila }"><span class="estado" :class="claseEstado({ operable: fila.operable, codigo: fila.estado })"><span class="estado-marca" />{{ fila.estado_nombre }}</span></template>
       <template #celda-variantes="{ fila }">{{ fila.variantes || '—' }}</template>
       <template #celda-actualizado="{ fila }"><span class="apagado">{{ fecha(fila.actualizado_en) }}</span></template>
       <template #acciones="{ fila }"><RouterLink :to="`/productos/${fila.id}`" class="btn btn-chico btn-fantasma" @click.stop>Abrir<Icono nombre="derecha" :tam="14" /></RouterLink></template>

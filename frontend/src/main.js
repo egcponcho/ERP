@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import '@fontsource-variable/inter'
+import '@fontsource-variable/plus-jakarta-sans'
 import './styles.css'
 import App from './App.vue'
 import router from './router.js'

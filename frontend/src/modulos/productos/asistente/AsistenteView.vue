@@ -114,7 +114,7 @@ const pasos = computed(() => {
   const lista = [
     { clave: 'tipo', titulo: 'Tipo de producto', completo: !!b.tipoId },
     { clave: 'general', titulo: 'Datos generales', completo: !!b.producto.nombre.trim() && !!b.producto.unidad_id, bloqueado: sinTipo },
-    { clave: 'caracteristicas', titulo: 'Características', completo: !faltanObligatorios.value.length, bloqueado: sinTipo },
+    { clave: 'caracteristicas', titulo: 'Características', completo: !sinTipo && !faltanObligatorios.value.length, bloqueado: sinTipo },
   ]
   if (ejes.value.length) lista.push({ clave: 'variantes', titulo: 'Variantes', completo: incluidas.value.length > 0, bloqueado: sinTipo })
   lista.push(
@@ -194,7 +194,7 @@ function empezarDeNuevo() {
   recuperado.value = false
 }
 function cerrar() {
-  router.push('/productos')
+  router.push('/productos/catalogo')
 }
 </script>
 

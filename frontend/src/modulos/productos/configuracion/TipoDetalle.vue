@@ -11,6 +11,7 @@ import { TIPOS_DATO, valorTexto } from '@/nucleo/formato.js'
 import BotonConfirmar from '@/componentes/BotonConfirmar.vue'
 import CampoAtributo from '@/componentes/CampoAtributo.vue'
 import Icono from '@/componentes/Icono.vue'
+import { fijarTitulo } from '@/nucleo/migas.js'
 import PanelEnLinea from '@/componentes/PanelEnLinea.vue'
 import TablaDatos from '@/componentes/TablaDatos.vue'
 import NuevaCaracteristica from '../asistente/NuevaCaracteristica.vue'
@@ -33,6 +34,7 @@ async function cargar() {
       api.get(`${CONFIG}/tipos-producto/${props.id}/esquema`), catalogo('tipos-producto', { recargar: true }), catalogo('atributos', { recargar: true }),
       catalogo('unidades'), catalogo('magnitudes')])
     tipo.value = t
+    fijarTitulo(t.nombre)
     esquema.value = e
     Object.assign(datos, { tipos, atributos: [...atributos], unidades, magnitudes })
     for (const k of Object.keys(edicion)) delete edicion[k]
@@ -164,16 +166,15 @@ function caracteristicaCreada(a) {
 
 <template>
   <div v-if="tipo && esquema">
-    <nav class="volver" aria-label="Ruta">
-      <RouterLink to="/productos/configuracion/tipos" class="volver"><Icono nombre="atras" :tam="14" />Tipos de producto</RouterLink>
-      <template v-for="t in ruta.slice(0, -1)" :key="t.id"> › <RouterLink :to="`/productos/configuracion/tipos/${t.id}`">{{ t.nombre }}</RouterLink></template>
-    </nav>
+    <p v-if="ruta.length > 1" class="ayuda mb-2">Subtipo de
+      <template v-for="(t, i) in ruta.slice(0, -1)" :key="t.id">{{ i ? ' › ' : '' }}<RouterLink :to="`/productos/configuracion/tipos/${t.id}`">{{ t.nombre }}</RouterLink></template>
+    </p>
     <header class="doc-cabeza">
       <div class="doc-fila">
         <span class="doc-numero">{{ tipo.nombre }}</span><code class="apagado">{{ tipo.codigo }}</code>
         <span v-if="!tipo.activo" class="estado estado-neutro"><span class="estado-marca" />Inactivo</span>
         <div class="doc-acciones">
-          <RouterLink class="btn" :to="`/productos?tipo=${tipo.codigo}`">Ver productos</RouterLink>
+          <RouterLink class="btn" :to="`/productos/catalogo?tipo=${tipo.codigo}`">Ver productos</RouterLink>
           <button v-if="!editando" type="button" class="btn" @click="editarTipo"><Icono nombre="editar" :tam="16" />Editar datos</button>
         </div>
       </div>

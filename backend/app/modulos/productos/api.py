@@ -134,22 +134,30 @@ def fijar_transiciones(db: DB, estado_id: int, datos: e.TransicionesEntrada):
 @router.get("")
 def listar(db: DB, request: Request, q: str | None = None, tipo_id: int | None = None, estado_id: int | None = None,
            categoria_id: int | None = None, orden: str = "codigo", pagina: int = 1, tamano: int = 50,
-           tipo: Codigos = None, estado: Codigos = None, unidad: Codigos = None):
+           tipo: Codigos = None, estado: Codigos = None, unidad: Codigos = None, pendiente: str | None = None):
     """Filtros por columna (uno o varios códigos): tipo, estado, unidad. Los parámetros `a.<atributo>`
-    filtran por atributo: a.color=ROJO, a.peso__min=2, a.peso__max=5 kg."""
+    filtran por atributo: a.color=ROJO, a.peso__min=2, a.peso__max=5 kg. `pendiente`: sin_codigos,
+    sin_categorias o sin_presentaciones."""
     atributos = {k[2:]: v for k, v in request.query_params.items() if k.startswith("a.")}
     return prod.listar(db, q, tipo_id, estado_id, categoria_id, atributos, orden, max(pagina, 1), min(max(tamano, 1), 200),
-                       {"tipo": tipo or [], "estado": estado or [], "unidad": unidad or []})
+                       {"tipo": tipo or [], "estado": estado or [], "unidad": unidad or []}, pendiente)
+
+
+@router.get("/resumen")
+def resumen(db: DB):
+    """Tablero del módulo de productos."""
+    return prod.resumen(db)
 
 
 @router.get("/valores/{columna}")
 def valores(db: DB, request: Request, columna: str, buscar: str | None = None, q: str | None = None,
             categoria_id: int | None = None, tipo: Codigos = None, estado: Codigos = None,
-            unidad: Codigos = None):
+            unidad: Codigos = None, pendiente: str | None = None):
     """Valores de una columna (tipo, estado, unidad) con cuántos productos tiene cada uno, con los demás filtros."""
     atributos = {k[2:]: v for k, v in request.query_params.items() if k.startswith("a.")}
     return prod.valores_columna(db, columna, buscar, q=q, categoria_id=categoria_id, atributos=atributos,
-                                columnas={"tipo": tipo or [], "estado": estado or [], "unidad": unidad or []})
+                                columnas={"tipo": tipo or [], "estado": estado or [], "unidad": unidad or []},
+                                pendiente=pendiente)
 
 
 @router.post("/asistente", status_code=status.HTTP_201_CREATED)

@@ -9,10 +9,12 @@ import { catalogo as leerCatalogo, invalidarCatalogo } from '@/nucleo/catalogos.
 import BotonConfirmar from '@/componentes/BotonConfirmar.vue'
 import Icono from '@/componentes/Icono.vue'
 import TablaDatos from '@/componentes/TablaDatos.vue'
+import { fijarTitulo } from '@/nucleo/migas.js'
 import { CATALOGOS } from './catalogos.js'
 
 const props = defineProps({ catalogo: { type: String, required: true } })
 const def = computed(() => CATALOGOS[props.catalogo])
+fijarTitulo(def.value?.titulo)
 const filas = ref([])
 const cargando = ref(true)
 const fuentes = reactive({})
@@ -131,7 +133,7 @@ const nombreEstado = (id) => filas.value.find((x) => x.id === id)?.nombre
         <template #celda-transiciones="{ fila }">
           <span v-if="(transiciones[fila.id] || []).length" class="insignias mt-0"><span v-for="d in transiciones[fila.id]" :key="d" class="etiqueta acento ms-0">{{ nombreEstado(d) }}</span></span>
           <span v-else class="apagado">Cualquiera</span></template>
-        <template #vacio>Todavía no hay registros. Use el formulario de la izquierda.</template>
+        <template #vacio>Todavía no hay registros. Use el formulario para agregar el primero.</template>
       </TablaDatos>
     </div>
   </div>
@@ -142,5 +144,10 @@ const nombreEstado = (id) => filas.value.find((x) => x.id === id)?.nombre
 .seccion-cabeza { margin-bottom: 14px; }
 .seccion-cabeza p { margin-top: 2px; }
 .form-catalogo { position: sticky; top: 76px; }
+/* Tableta: el formulario a todo lo ancho en dos columnas, para que la tabla quede a la vista */
+@media (max-width: 1100px) {
+  .form-catalogo { position: static; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px 16px; align-items: start; }
+  .form-catalogo > :is(.fila-flex, .nota, div.campo, .ayuda-check) { grid-column: 1 / -1; }
+}
 .ayuda-check { margin-top: -8px; padding-inline-start: 24px; }
 </style>

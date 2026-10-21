@@ -1,7 +1,7 @@
 <script setup>
 // Último paso: todo se valida en el servidor sin guardar (los códigos y SKU
 // reales, los problemas de cada paso) y se elige en qué estado queda el producto.
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { api, CONFIG } from '@/nucleo/api.js'
 import { valorTexto } from '@/nucleo/formato.js'
 import Icono from '@/componentes/Icono.vue'
@@ -44,6 +44,13 @@ const faltantes = computed(() => props.errores.flatMap((e) => e.faltantes || [])
   ...f, paso: f.nivel === 'categoria' ? 'clasificacion' : f.nivel === 'variante' ? 'variantes' : 'caracteristicas' })))
 const problemas = computed(() => props.errores.filter((e) => !e.faltantes))
 
+// Si aparecen errores, el foco va al resumen de errores (cada uno enlaza al paso donde se corrige)
+watch(() => props.errores.length, async (n, antes) => {
+  if (!n || antes) return
+  await nextTick()
+  document.querySelector('.resumen-errores')?.focus()
+})
+
 const campos = computed(() => props.esquema.campos.filter((c) => c.nivel === 'producto'))
 const ejes = computed(() => props.esquema.campos.filter((c) => c.es_eje))
 const columnasVariantes = computed(() => [{ clave: 'codigo', texto: 'SKU', fija: true },
@@ -72,7 +79,7 @@ const tipoId = (id) => props.datos.tiposIdentificador.find((t) => t.id === id)?.
   <section v-if="ocupado && !previa" class="panel" aria-busy="true"><p class="ayuda">Revisando todo antes de crear…</p>
     <span class="esqueleto mt-chico" style="height: 120px" /></section>
 
-  <section v-if="faltantes.length" class="panel">
+  <section v-if="faltantes.length" class="panel resumen-errores" tabindex="-1" aria-label="Lo que falta">
     <div class="nota aviso"><Icono nombre="alerta" :tam="16" />
       <div class="crece"><b>Para dejarlo en ese estado falta:</b>
         <ul class="lista-mensajes mt-chico">
@@ -83,7 +90,7 @@ const tipoId = (id) => props.datos.tiposIdentificador.find((t) => t.id === id)?.
       </div>
     </div>
   </section>
-  <section v-if="problemas.length" class="panel">
+  <section v-if="problemas.length" class="panel resumen-errores" tabindex="-1" aria-label="Datos por corregir">
     <div class="nota error" role="alert"><Icono nombre="alerta" :tam="16" />
       <div class="crece"><b>Hay datos por corregir:</b>
         <ul class="lista-mensajes mt-chico">

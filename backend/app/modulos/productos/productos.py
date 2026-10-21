@@ -23,6 +23,8 @@ from app.modulos.productos.modelos import (
     Categoria,
     EstadoProducto,
     EstadoTransicion,
+    Identificador,
+    Presentacion,
     Producto,
     ProductoCategoria,
     Taxonomia,
@@ -474,11 +476,25 @@ COLUMNAS_VALORES = {"tipo": (TipoProducto.codigo, TipoProducto.nombre), "estado"
                     "unidad": (UnidadMedida.codigo, UnidadMedida.nombre)}
 
 
+# Productos a los que les falta algo que se suele completar después del alta (resumen y filtro «pendiente»)
+PENDIENTES = {
+    "sin_codigos": lambda: ~exists().where(Identificador.producto_id == Producto.id),
+    "sin_categorias": lambda: ~exists().where(ProductoCategoria.producto_id == Producto.id),
+    "sin_presentaciones": lambda: ~exists().where(Presentacion.producto_id == Producto.id),
+}
+
+
 def _filtros(db: Session, q: str | None, tipo_id: int | None, estado_id: int | None, categoria_id: int | None,
-             atributos: dict | None, columnas: dict[str, list[str]] | None, excepto: str | None = None) -> list:
+             atributos: dict | None, columnas: dict[str, list[str]] | None, excepto: str | None = None,
+             pendiente: str | None = None) -> list:
     """Condiciones de la lista. `columnas`: {"tipo": [códigos], "estado": […], "unidad": […]};
-    `excepto` deja fuera el filtro de una columna (para calcular sus propios valores)."""
+    `excepto` deja fuera el filtro de una columna (para calcular sus propios valores);
+    `pendiente`: una clave de PENDIENTES."""
     filtros = []
+    if pendiente:
+        if pendiente not in PENDIENTES:
+            raise invalido(f"Pendiente no válido: use {', '.join(PENDIENTES)}.")
+        filtros.append(PENDIENTES[pendiente]())
     if q:
         t = q.strip().lower()
         filtros.append(or_(func.lower(Producto.codigo).contains(t, autoescape=True),
@@ -517,10 +533,11 @@ def _con_columnas(consulta):
 
 def listar(db: Session, q: str | None = None, tipo_id: int | None = None, estado_id: int | None = None,
            categoria_id: int | None = None, atributos: dict[str, str] | None = None, orden: str = "codigo",
-           pagina: int = 1, tamano: int = 50, columnas: dict[str, list[str]] | None = None) -> dict:
+           pagina: int = 1, tamano: int = 50, columnas: dict[str, list[str]] | None = None,
+           pendiente: str | None = None) -> dict:
     """Productos con filtros. `atributos`: {"color": "ROJO", "peso__min": "2", "peso__max": "5 kg"}
     (sobre el producto o cualquiera de sus variantes). `orden`: "campo", "-campo" o "campo:asc|desc"."""
-    filtros = _filtros(db, q, tipo_id, estado_id, categoria_id, atributos, columnas)
+    filtros = _filtros(db, q, tipo_id, estado_id, categoria_id, atributos, columnas, pendiente=pendiente)
     total = db.scalar(_con_columnas(select(func.count(Producto.id))).where(*filtros))
     campo, _, direccion = (orden or "codigo").partition(":")
     desc = direccion == "desc" or campo.startswith("-")
@@ -546,12 +563,42 @@ def valores_columna(db: Session, columna: str, buscar: str | None = None, **filt
         raise invalido(f"La columna {columna} no se filtra por valores.")
     codigo, nombre = COLUMNAS_VALORES[columna]
     condiciones = _filtros(db, filtros.get("q"), filtros.get("tipo_id"), filtros.get("estado_id"), filtros.get("categoria_id"),
-                           filtros.get("atributos"), filtros.get("columnas"), excepto=columna)
+                           filtros.get("atributos"), filtros.get("columnas"), excepto=columna,
+                           pendiente=filtros.get("pendiente"))
     if buscar:
         condiciones.append(func.lower(nombre).contains(buscar.strip().lower(), autoescape=True))
     filas = db.execute(_con_columnas(select(codigo, nombre, func.count(Producto.id))).where(*condiciones)
                        .group_by(codigo, nombre).order_by(nombre))
     return [{"valor": c, "texto": n, "n": k} for c, n, k in filas]
+
+
+def resumen(db: Session, recientes: int = 6) -> dict:
+    """Tablero del módulo: cifras generales, productos por estado y por tipo, pendientes y lo último modificado."""
+    total = db.scalar(select(func.count(Producto.id))) or 0
+    por_estado = db.execute(
+        select(EstadoProducto.codigo, EstadoProducto.nombre, EstadoProducto.operable, EstadoProducto.inicial,
+               func.count(Producto.id))
+        .outerjoin(Producto, Producto.estado_id == EstadoProducto.id)
+        .where(EstadoProducto.activo.is_(True))
+        .group_by(EstadoProducto.id, EstadoProducto.codigo, EstadoProducto.nombre, EstadoProducto.operable,
+                  EstadoProducto.inicial, EstadoProducto.orden)
+        .order_by(EstadoProducto.orden, EstadoProducto.id))
+    por_tipo = db.execute(
+        select(TipoProducto.codigo, TipoProducto.nombre, func.count(Producto.id))
+        .join(Producto, Producto.tipo_id == TipoProducto.id)
+        .group_by(TipoProducto.codigo, TipoProducto.nombre)
+        .order_by(func.count(Producto.id).desc(), TipoProducto.nombre))
+    estados = [{"codigo": c, "nombre": n, "operable": o, "inicial": i, "n": k} for c, n, o, i, k in por_estado]
+    return {
+        "total": total,
+        "operables": sum(x["n"] for x in estados if x["operable"]),
+        "variantes": db.scalar(select(func.count(Variante.id))) or 0,
+        "presentaciones": db.scalar(select(func.count(Presentacion.id))) or 0,
+        "por_estado": estados,
+        "por_tipo": [{"codigo": c, "nombre": n, "n": k} for c, n, k in por_tipo],
+        "pendientes": {k: db.scalar(select(func.count(Producto.id)).where(f())) or 0 for k, f in PENDIENTES.items()},
+        "recientes": listar(db, orden="actualizado:desc", tamano=recientes)["datos"],
+    }
 
 
 def _subcategorias(db: Session, categoria_id: int) -> set[int]:

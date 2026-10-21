@@ -84,3 +84,20 @@ def test_filtros_por_columna_y_sus_valores(cli, calzado):
     assert [v["valor"] for v in cli.ok("get", f"{P}/valores/estado", params={"tipo": "OTRO", "estado": "ACTIVO"})] == ["BORRADOR"]
     assert [x["codigo"] for x in cli.ok("get", P, params={"orden": "tipo:desc"})["datos"]] == ["X1", "CAL-001"]
     cli.ok("get", f"{P}/valores/nombre", 422)
+
+
+def test_resumen_del_modulo_y_pendientes(cli, calzado):
+    vacio = cli.ok("get", f"{P}/resumen")
+    assert vacio["total"] == 0 and vacio["recientes"] == [] and all(x["n"] == 0 for x in vacio["por_estado"])
+    cli.ok("post", f"{P}/asistente", 201, json=_datos(cli, calzado))
+    cli.ok("post", f"{P}/asistente", 201, json=_datos(cli, calzado, presentaciones=[], identificadores=[], estado_id=None))
+    r = cli.ok("get", f"{P}/resumen")
+    assert (r["total"], r["operables"], r["variantes"], r["presentaciones"]) == (2, 1, 8, 1)
+    assert {x["codigo"]: x["n"] for x in r["por_estado"]}["BORRADOR"] == 1
+    assert r["por_tipo"] == [{"codigo": "CALZADO", "nombre": "Calzado", "n": 2}]
+    assert r["pendientes"] == {"sin_codigos": 1, "sin_categorias": 2, "sin_presentaciones": 1}
+    assert len(r["recientes"]) == 2
+    # Cada pendiente lleva a su filtro del catálogo
+    assert [p["codigo"] for p in cli.ok("get", P, params={"pendiente": "sin_codigos"})["datos"]] == ["CAL-002"]
+    assert cli.ok("get", f"{P}/valores/estado", params={"pendiente": "sin_codigos"}) == [{"valor": "BORRADOR", "texto": "Borrador", "n": 1}]
+    cli.ok("get", P, 422, params={"pendiente": "otro"})

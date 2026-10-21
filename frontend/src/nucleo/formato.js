@@ -29,3 +29,6 @@ export function tonoEstado(estado) {
   if (estado.inicial || estado.codigo === 'BORRADOR') return 'info'
   return ''
 }
+
+// Clase de la insignia de un estado (.estado-ok, .estado-info…): color, forma y texto
+export const claseEstado = (estado) => `estado-${tonoEstado(estado) || 'neutro'}`

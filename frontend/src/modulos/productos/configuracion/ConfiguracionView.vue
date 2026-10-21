@@ -1,11 +1,13 @@
 <script setup>
-// Configuración del módulo: menú lateral de apartados (el mismo patrón de facturacion) y el apartado elegido.
+// Configuración del módulo: una portada con todos los apartados y, dentro de
+// cada uno, el menú lateral para saltar a otro sin volver a la portada.
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import Icono from '@/componentes/Icono.vue'
 import { APARTADOS } from './catalogos.js'
 
 const route = useRoute()
+const enPortada = computed(() => route.name === 'configuracion')
 const actual = computed(() => route.meta.apartado || route.params.catalogo || route.path.split('/')[3])
 </script>
 
@@ -13,10 +15,10 @@ const actual = computed(() => route.meta.apartado || route.params.catalogo || ro
   <div>
     <header class="pagina-cabeza">
       <div><h1>Configuración de productos</h1>
-        <p>Lo que define cómo son sus productos. Se configura una vez y el asistente de alta lo usa.</p></div>
-      <div class="acciones"><RouterLink class="btn" to="/productos/nuevo"><Icono nombre="mas" :tam="16" />Nuevo producto</RouterLink></div>
+        <p>Define cómo son sus productos. Se configura una vez y el asistente de alta lo usa.</p></div>
     </header>
-    <div class="layout-lateral">
+    <RouterView v-if="enPortada" />
+    <div v-else class="layout-lateral">
       <nav class="menu-lateral" aria-label="Apartados de configuración">
         <template v-for="g in APARTADOS" :key="g.grupo">
           <p class="menu-grupo">{{ g.grupo }}</p>
