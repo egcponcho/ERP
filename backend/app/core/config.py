@@ -1,5 +1,6 @@
 """Configuración por variables de entorno."""
 import os
+from pathlib import Path
 
 
 def url_base_datos(url: str) -> str:
@@ -15,6 +16,8 @@ class Config:
     DATABASE_URL: str = url_base_datos(os.environ.get("DATABASE_URL", "sqlite:///./erp.db"))
     # Organización con la que trabaja la API mientras no exista el módulo de acceso
     ORGANIZACION_POR_DEFECTO: int = int(os.environ.get("ORGANIZACION_POR_DEFECTO", "1"))
+    # Interfaz compilada (npm run build); si no existe, la API funciona sola
+    FRONTEND_DIST: Path = Path(os.environ.get("FRONTEND_DIST", Path(__file__).resolve().parents[3] / "frontend" / "dist"))
 
 
 settings = Config()

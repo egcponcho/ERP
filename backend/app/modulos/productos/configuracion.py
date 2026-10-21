@@ -173,7 +173,10 @@ def _atributo_dict(a: Atributo) -> dict:
 
 
 def _tipo_dict(t: TipoProducto) -> dict:
-    return {**fila_dict(t), "atributos": len(t.asignaciones)}
+    """El tipo con sus asignaciones propias (también las que ocultan un atributo heredado)."""
+    return {**fila_dict(t), "atributos": len(t.asignaciones),
+            "asignaciones": [{k: getattr(a, k) for k in ("atributo_id", "nivel", "es_eje", "obligatorio", "oculto",
+                                                         "valor_defecto", "orden")} for a in t.asignaciones]}
 
 
 def _estado_dict(s: EstadoProducto) -> dict:

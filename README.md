@@ -11,6 +11,7 @@ identificadores, relaciones entre productos y estados configurables. El
 diseño está en [docs/PRODUCTOS.md](docs/PRODUCTOS.md).
 
 - **Backend:** Python 3.12+, FastAPI, SQLAlchemy 2, Alembic y PostgreSQL (SQLite para desarrollo y pruebas).
+- **Frontend:** Vue 3 + Vite, sin librerías de componentes; tema claro y oscuro, accesible con teclado y lector de pantalla.
 - **Varias organizaciones:** cada tabla lleva `organizacion_id` y el ORM aísla los datos de cada una.
 - **Identificadores y textos en español.**
 
@@ -33,17 +34,37 @@ docs/
 
 ## Cómo empezar
 
-```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements-dev.txt
+Necesita Python 3.12+ y Node.js 20+.
 
-alembic upgrade head                           # crea la base (SQLite: backend/erp.db)
-python -m app.modulos.productos.instalacion    # opcional: unidades, estados y tipos sugeridos
-uvicorn app.main:app --reload                  # API en http://localhost:8000, documentación en /docs
+```bash
+# Terminal 1: la API en http://localhost:8000
+cd backend
+python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
+pip install -r requirements-dev.txt
+alembic upgrade head                                  # crea la base (SQLite: backend/erp.db)
+python -m app.modulos.productos.instalacion           # opcional: unidades, estados y tipos sugeridos
+uvicorn app.main:app --reload
+
+# Terminal 2: la interfaz en http://localhost:5173 (redirige /api al puerto 8000)
+cd frontend
+npm install
+npm run dev
 ```
 
+Abra **http://localhost:5173**. La documentación de la API sigue en http://localhost:8000/docs.
+
+Para usar un solo servidor: `npm run build` dentro de `frontend` y la API sirve la interfaz compilada en http://localhost:8000.
+
 Con PostgreSQL: `DATABASE_URL=postgresql+psycopg://usuario:clave@host/base`.
+
+### Interfaz
+
+Vue 3 + Vite, sin librerías de componentes (íconos SVG propios), en `frontend/src`:
+
+- `nucleo/`: cliente de la API, avisos y confirmaciones, tema claro/oscuro, catálogos en memoria.
+- `componentes/`: piezas reutilizables (modal accesible, pestañas, paginación, estados vacíos) y `CampoAtributo.vue`, que dibuja el control de cualquier atributo según su tipo de dato. Ninguna pantalla conoce los atributos de un rubro: el formulario sale del esquema del tipo.
+- `modulos/productos/`: lista con filtros por atributo, alta en dos pasos y ficha con pestañas (variantes, presentaciones, identificadores, relaciones, revisiones).
+- `modulos/configuracion/`: tipos de producto (con herencia y vista previa de la ficha), atributos, categorías, unidades, estados, identificadores y relaciones.
 
 ## En la nube (Render)
 
@@ -62,7 +83,7 @@ También sirve cualquier otra base PostgreSQL (una instancia pagada de Render, N
 1. Entre a https://dashboard.render.com/blueprints y haga clic en **New Blueprint Instance**.
 2. Conecte GitHub, elija este repositorio y la rama que quiere desplegar.
 3. Render pide `DATABASE_URL`: pegue la dirección del paso 1.
-4. Haga clic en **Apply**. En unos minutos queda en línea en `https://erp-XXXX.onrender.com`; la raíz abre la documentación interactiva de la API (`/docs`).
+4. Haga clic en **Apply**. En unos minutos queda en línea en `https://erp-XXXX.onrender.com`; la raíz abre la interfaz y la API queda en `/api` (documentación en `/docs`).
 
 Al arrancar, el contenedor (`backend/arrancar.sh`) aplica las migraciones y, con `CARGAR_CONFIG_BASE=1`, agrega la configuración sugerida que falte. Si borra a propósito algo de esa configuración y no quiere que vuelva al reiniciar, cambie `CARGAR_CONFIG_BASE` a `0` en Render (*Environment*).
 
@@ -75,4 +96,6 @@ cd backend
 pytest                                                                   # SQLite en memoria
 TEST_DATABASE_URL=postgresql+psycopg://erp@localhost/erp_test pytest      # PostgreSQL (la base se vacía)
 ruff check .
+
+cd ../frontend && npm run lint && npm run build
 ```

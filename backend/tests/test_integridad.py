@@ -119,3 +119,33 @@ def test_url_de_la_plataforma_usa_psycopg():
     assert url_base_datos("postgresql://u:c@h/b") == "postgresql+psycopg://u:c@h/b"
     assert url_base_datos("postgresql+psycopg://u@h/b") == "postgresql+psycopg://u@h/b"
     assert url_base_datos("sqlite:///./erp.db") == "sqlite:///./erp.db"
+
+
+def test_sirve_la_interfaz_compilada(tmp_path, monkeypatch):
+    """Con FRONTEND_DIST, las rutas de la app devuelven index.html y la API sigue respondiendo JSON."""
+    import importlib
+
+    from fastapi.testclient import TestClient
+
+    (tmp_path / "assets").mkdir()
+    (tmp_path / "index.html").write_text("<div id=app></div>")
+    (tmp_path / "assets" / "app.js").write_text("console.log(1)")
+    (tmp_path / "favicon.svg").write_text("<svg/>")
+    monkeypatch.setenv("FRONTEND_DIST", str(tmp_path))
+    import app.core.config as config
+    import app.main as principal
+
+    importlib.reload(config)
+    try:
+        importlib.reload(principal)
+        c = TestClient(principal.app)
+        assert "id=app" in c.get("/productos/5").text
+        assert c.get("/assets/app.js").text == "console.log(1)"
+        assert c.get("/favicon.svg").text == "<svg/>"
+        assert c.get("/../../etc/passwd").status_code in (200, 404) and "root:" not in c.get("/../../etc/passwd").text
+        assert c.get("/api/no-existe").status_code == 404
+        assert c.get("/api/salud").json() == {"estado": "ok"}
+    finally:
+        monkeypatch.delenv("FRONTEND_DIST")
+        importlib.reload(config)
+        importlib.reload(principal)
