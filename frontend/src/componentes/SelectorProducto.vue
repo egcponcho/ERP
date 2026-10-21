@@ -1,11 +1,11 @@
 <script setup>
-// Buscador de productos (combobox): escribe y elige. v-model = id del producto.
+// Buscador de productos (combobox): se escribe y se elige. v-model = id del producto.
 import { onMounted, ref, watch } from 'vue'
 import { api } from '@/nucleo/api.js'
 
 const props = defineProps({ modelValue: { type: Number, default: null }, id: { type: String, required: true },
                             excluir: { type: Number, default: null }, invalido: { type: Boolean, default: false } })
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'elegido'])
 const texto = ref('')
 const opciones = ref([])
 const abierto = ref(false)
@@ -25,11 +25,7 @@ async function buscar() {
     activo.value = 0
   } catch { opciones.value = [] }
 }
-
-watch(texto, () => {
-  clearTimeout(espera)
-  espera = setTimeout(buscar, 200)
-})
+watch(texto, () => { clearTimeout(espera); espera = setTimeout(buscar, 200) })
 
 function alEntrar() {
   abierto.value = true
@@ -38,13 +34,12 @@ function alEntrar() {
 function alSalir() {
   setTimeout(() => (abierto.value = false), 150)
 }
-
 function elegir(p) {
   emit('update:modelValue', p.id)
+  emit('elegido', p)
   texto.value = `${p.codigo} · ${p.nombre}`
   abierto.value = false
 }
-
 function teclas(e) {
   if (e.key === 'ArrowDown') { e.preventDefault(); abierto.value = true; activo.value = Math.min(activo.value + 1, opciones.value.length - 1) }
   else if (e.key === 'ArrowUp') { e.preventDefault(); activo.value = Math.max(activo.value - 1, 0) }
@@ -54,22 +49,24 @@ function teclas(e) {
 </script>
 
 <template>
-  <div class="selector">
-    <input :id="id" v-model="texto" class="control" :class="{ invalido }" type="text" role="combobox" autocomplete="off"
+  <div class="selector-producto">
+    <input :id="id" v-model="texto" class="entrada" :aria-invalid="invalido" type="text" role="combobox" autocomplete="off"
            :aria-expanded="abierto" :aria-controls="`${id}-lista`" placeholder="Buscar por código o nombre…"
            @focus="alEntrar" @input="abierto = true; emit('update:modelValue', null)" @blur="alSalir" @keydown="teclas" />
-    <ul v-if="abierto && opciones.length" :id="`${id}-lista`" class="lista" role="listbox">
+    <ul v-if="abierto && opciones.length" :id="`${id}-lista`" class="sp-lista" role="listbox">
       <li v-for="(p, i) in opciones" :key="p.id" role="option" :aria-selected="i === activo" :class="{ activo: i === activo }"
           @mousedown.prevent="elegir(p)" @mouseenter="activo = i">
-        <span class="mono">{{ p.codigo }}</span><span class="crece">{{ p.nombre }}</span><span class="tenue chico">{{ p.tipo }}</span>
+        <span class="mono">{{ p.codigo }}</span><span class="crece">{{ p.nombre }}</span><span class="ayuda">{{ p.tipo_nombre }}</span>
       </li>
     </ul>
   </div>
 </template>
 
 <style scoped>
-.selector { position: relative; }
-.lista { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; right: 0; margin: 0; padding: 4px; list-style: none; background: var(--superficie); border: 1px solid var(--linea); border-radius: var(--radio); box-shadow: var(--sombra-media); max-height: 260px; overflow-y: auto; }
-li { display: flex; gap: var(--e-3); align-items: center; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 13.5px; }
-li.activo { background: var(--acento-claro); }
+.selector-producto { position: relative; }
+.selector-producto .entrada { width: 100%; }
+.sp-lista { position: absolute; z-index: 30; top: calc(100% + 4px); inset-inline: 0; margin: 0; padding: 4px; list-style: none; background: var(--superficie);
+  border: 1px solid var(--linea); border-radius: var(--radio); box-shadow: var(--sombra-media); max-height: 260px; overflow-y: auto; }
+.sp-lista li { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+.sp-lista li.activo { background: var(--acento-claro); }
 </style>

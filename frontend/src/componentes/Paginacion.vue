@@ -1,25 +1,46 @@
 <script setup>
+import { t, tx } from '@/nucleo/texto.js'
 import { computed } from 'vue'
 import Icono from './Icono.vue'
 
-const props = defineProps({ pagina: { type: Number, required: true }, tamano: { type: Number, required: true }, total: { type: Number, required: true } })
-const emit = defineEmits(['cambiar'])
-const paginas = computed(() => Math.max(1, Math.ceil(props.total / props.tamano)))
-const desde = computed(() => (props.total ? (props.pagina - 1) * props.tamano + 1 : 0))
-const hasta = computed(() => Math.min(props.total, props.pagina * props.tamano))
+// Pie de tabla: rango mostrado, páginas y filas por página
+const props = defineProps({ page: { type: Number, default: 1 }, size: { type: Number, default: 25 }, total: { type: Number, default: 0 }, tamanos: { type: Array, default: () => [5, 10, 15, 25, 50, 100] } })
+const emit = defineEmits(['cambiar', 'tamano'])
+const paginas = computed(() => Math.max(1, Math.ceil((props.total || 0) / props.size)))
+const desde = computed(() => (props.total ? (props.page - 1) * props.size + 1 : 0))
+const hasta = computed(() => Math.min(props.page * props.size, props.total || 0))
+// Hasta 7 botones: primera, última y las vecinas de la actual
+const botones = computed(() => {
+  const n = paginas.value
+  const p = props.page
+  if (n <= 7) return Array.from({ length: n }, (_, i) => i + 1)
+  const set = new Set([1, n, p - 1, p, p + 1].filter((x) => x >= 1 && x <= n))
+  const lista = [...set].sort((a, b) => a - b)
+  const res = []
+  lista.forEach((x, i) => {
+    if (i && x - lista[i - 1] > 1) res.push('…')
+    res.push(x)
+  })
+  return res
+})
 </script>
 
 <template>
-  <nav class="paginacion" aria-label="Paginación">
-    <span class="tenue chico num">{{ desde }}–{{ hasta }} de {{ total }}</span>
-    <div class="fila">
-      <button class="btn chico icono" type="button" :disabled="pagina <= 1" aria-label="Página anterior" @click="emit('cambiar', pagina - 1)"><Icono nombre="izquierda" :tam="16" /></button>
-      <span class="chico num">Página {{ pagina }} de {{ paginas }}</span>
-      <button class="btn chico icono" type="button" :disabled="pagina >= paginas" aria-label="Página siguiente" @click="emit('cambiar', pagina + 1)"><Icono nombre="derecha" :tam="16" /></button>
+  <div class="paginacion">
+    <span class="ayuda">{{ t('{0}–{1} of {2} records', [desde, hasta, props.total || 0]) }}</span>
+    <div class="paginas" role="navigation" :aria-label="t('Pages')">
+      <button type="button" class="pag-btn" :disabled="props.page <= 1" :aria-label="t('Previous page')" @click="emit('cambiar', props.page - 1)"><Icono nombre="atras" :tam="14" /></button>
+      <template v-for="(b, i) in botones" :key="i">
+        <span v-if="b === '…'" class="ayuda">…</span>
+        <button v-else type="button" class="pag-btn" :aria-current="b === props.page ? 'page' : undefined" @click="emit('cambiar', b)">{{ tx(b) }}</button>
+      </template>
+      <button type="button" class="pag-btn" :disabled="props.page >= paginas" :aria-label="t('Next page')" @click="emit('cambiar', props.page + 1)"><Icono nombre="flecha" :tam="14" /></button>
     </div>
-  </nav>
+    <label class="fila-flex ayuda gap-2">
+      {{ t('Rows per page') }}
+      <select class="entrada relleno-chico" :value="props.size" @change="emit('tamano', Number($event.target.value)); emit('cambiar', 1)">
+        <option v-for="txt in props.tamanos" :key="txt" :value="txt">{{ tx(txt) }}</option>
+      </select>
+    </label>
+  </div>
 </template>
-
-<style scoped>
-.paginacion { display: flex; justify-content: space-between; align-items: center; padding: var(--e-3) var(--e-4); border-top: 1px solid var(--linea); gap: var(--e-3); }
-</style>

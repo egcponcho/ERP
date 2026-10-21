@@ -1,7 +1,7 @@
-// Notificaciones breves (toasts) y confirmaciones, compartidas por toda la app.
+// Avisos breves (toasts) compartidos por toda la app.
 import { reactive } from 'vue'
 
-export const avisos = reactive({ lista: [], confirmacion: null })
+export const avisos = reactive({ lista: [] })
 let siguiente = 1
 
 export function avisar(texto, tipo = 'ok', ms = 3800) {
@@ -15,14 +15,6 @@ export function cerrarAviso(id) {
   if (i >= 0) avisos.lista.splice(i, 1)
 }
 
-// Muestra el mensaje de un error de la API (con la lista de problemas si la trae)
 export function avisarError(e) {
   avisar(e?.message || 'Ocurrió un error inesperado.', 'error', 6000)
-}
-
-// confirmar({titulo, mensaje, accion, peligro}) → Promise<boolean>
-export function confirmar(opciones) {
-  return new Promise((resolver) => {
-    avisos.confirmacion = { accion: 'Confirmar', peligro: false, ...opciones, resolver }
-  })
 }

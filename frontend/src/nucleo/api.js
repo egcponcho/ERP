@@ -20,7 +20,10 @@ export class ApiError extends Error {
 function qs(params) {
   if (!params) return ''
   const p = new URLSearchParams()
-  for (const [k, v] of Object.entries(params)) if (v !== null && v !== undefined && v !== '') p.append(k, v)
+  for (const [k, v] of Object.entries(params)) {
+    // Una lista se manda repetida: ?tipo=A&tipo=B
+    for (const x of Array.isArray(v) ? v : [v]) if (x !== null && x !== undefined && x !== '') p.append(k, x)
+  }
   const s = p.toString()
   return s ? `?${s}` : ''
 }

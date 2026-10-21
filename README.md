@@ -59,12 +59,15 @@ Con PostgreSQL: `DATABASE_URL=postgresql+psycopg://usuario:clave@host/base`.
 
 ### Interfaz
 
-Vue 3 + Vite, sin librerías de componentes (íconos SVG propios), en `frontend/src`:
+Vue 3 + Vite, sin librerías de componentes. Usa el **mismo sistema visual y las mismas piezas que `facturacion`**: estilos, marco, tabla común (`TablaDatos`: orden y filtro por columna como en Excel, columnas, densidad, vistas guardadas, detalle desplegable, paginación) y asistente por pasos. Casi no hay ventanas emergentes: los formularios se abren dentro de la página (`PanelEnLinea`), las filas se editan al desplegarlas y las bajas se confirman en el mismo botón (`BotonConfirmar`).
 
-- `nucleo/`: cliente de la API, avisos y confirmaciones, tema claro/oscuro, catálogos en memoria.
-- `componentes/`: piezas reutilizables (modal accesible, pestañas, paginación, estados vacíos) y `CampoAtributo.vue`, que dibuja el control de cualquier atributo según su tipo de dato. Ninguna pantalla conoce los atributos de un rubro: el formulario sale del esquema del tipo.
-- `modulos/productos/`: lista con filtros por atributo, alta en dos pasos y ficha con pestañas (variantes, presentaciones, identificadores, relaciones, revisiones).
-- `modulos/configuracion/`: tipos de producto (con herencia y vista previa de la ficha), atributos, categorías, unidades, estados, identificadores y relaciones.
+Todo vive en un solo módulo, **Productos**, con tres apartados:
+
+- **Catálogo** (`modulos/productos/CatalogoView.vue`): la tabla común en modo servidor, con búsqueda, categoría y filtros por cualquier característica. Cada producto abre su ficha (`ficha/`) con pestañas: ficha, variantes, presentaciones, códigos, relaciones y revisiones.
+- **Nuevo producto** (`modulos/productos/asistente/`): asistente paso a paso con el tipo de producto (que se puede crear ahí mismo, con características nuevas), los datos generales, las características, las variantes (combinaciones con vista previa), el empaque y los códigos, las categorías y una revisión final. La revisión valida todo en el servidor sin guardar y muestra los códigos y SKU reales. El borrador se guarda solo en el navegador y el alta completa se guarda en una sola transacción (`POST /api/productos/asistente`).
+- **Configuración** (`modulos/productos/configuracion/`): menú lateral de apartados. Tiene tipos de producto (con herencia y vista previa de la ficha), características, secciones, categorías, unidades, magnitudes, estados, tipos de código y de relación. Cada catálogo muestra el formulario al lado de la tabla.
+
+`componentes/CampoAtributo.vue` dibuja el control de cualquier característica según su tipo de dato: ninguna pantalla conoce los atributos de un rubro.
 
 ## En la nube (Railway)
 

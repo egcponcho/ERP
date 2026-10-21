@@ -27,6 +27,7 @@ from app.modulos.productos.modelos import (
     ProductoCategoria,
     Taxonomia,
     TipoProducto,
+    UnidadMedida,
     ValorAtributo,
     ValorAtributoOpcion,
     Variante,
@@ -466,14 +467,17 @@ def _filtro_atributo(db: Session, codigo: str, operador: str, crudo):
     return exists().where(and_(*base)).correlate(Producto)
 
 
-ORDEN = {"codigo": Producto.codigo, "nombre": Producto.nombre, "actualizado": Producto.actualizado_en}
+ORDEN = {"codigo": Producto.codigo, "nombre": Producto.nombre, "actualizado": Producto.actualizado_en,
+         "tipo": TipoProducto.nombre, "estado": EstadoProducto.orden, "unidad": UnidadMedida.codigo}
+# Columnas de la tabla que se filtran por sus valores (como en Excel): columna → (columna del código, del nombre)
+COLUMNAS_VALORES = {"tipo": (TipoProducto.codigo, TipoProducto.nombre), "estado": (EstadoProducto.codigo, EstadoProducto.nombre),
+                    "unidad": (UnidadMedida.codigo, UnidadMedida.nombre)}
 
 
-def listar(db: Session, q: str | None = None, tipo_id: int | None = None, estado_id: int | None = None,
-           categoria_id: int | None = None, atributos: dict[str, str] | None = None, orden: str = "codigo",
-           pagina: int = 1, tamano: int = 50) -> dict:
-    """Productos con filtros. `atributos`: {"color": "ROJO", "peso__min": "2", "peso__max": "5 kg"}
-    (sobre el producto o cualquiera de sus variantes)."""
+def _filtros(db: Session, q: str | None, tipo_id: int | None, estado_id: int | None, categoria_id: int | None,
+             atributos: dict | None, columnas: dict[str, list[str]] | None, excepto: str | None = None) -> list:
+    """Condiciones de la lista. `columnas`: {"tipo": [códigos], "estado": […], "unidad": […]};
+    `excepto` deja fuera el filtro de una columna (para calcular sus propios valores)."""
     filtros = []
     if q:
         t = q.strip().lower()
@@ -488,6 +492,12 @@ def listar(db: Session, q: str | None = None, tipo_id: int | None = None, estado
     if categoria_id:
         filtros.append(exists().where(ProductoCategoria.producto_id == Producto.id,
                                       ProductoCategoria.categoria_id.in_(_subcategorias(db, categoria_id))))
+    for columna, codigos in (columnas or {}).items():
+        if columna == excepto or not codigos:
+            continue
+        if columna not in COLUMNAS_VALORES:
+            raise invalido(f"No se puede filtrar por {columna}.")
+        filtros.append(COLUMNAS_VALORES[columna][0].in_(codigos))
     for clave, crudo in (atributos or {}).items():
         codigo, _, operador = clave.partition("__")
         if operador not in ("", "min", "max"):
@@ -496,19 +506,52 @@ def listar(db: Session, q: str | None = None, tipo_id: int | None = None, estado
             numero_txt, unidad = crudo.strip().split(None, 1)
             crudo = {"valor": numero_txt, "unidad": unidad}
         filtros.append(_filtro_atributo(db, codigo, operador, crudo))
-    total = db.scalar(select(func.count()).select_from(Producto).where(*filtros))
-    col = ORDEN.get(orden.lstrip("-"))
+    return filtros
+
+
+def _con_columnas(consulta):
+    return (consulta.join(TipoProducto, TipoProducto.id == Producto.tipo_id)
+            .join(EstadoProducto, EstadoProducto.id == Producto.estado_id)
+            .join(UnidadMedida, UnidadMedida.id == Producto.unidad_id))
+
+
+def listar(db: Session, q: str | None = None, tipo_id: int | None = None, estado_id: int | None = None,
+           categoria_id: int | None = None, atributos: dict[str, str] | None = None, orden: str = "codigo",
+           pagina: int = 1, tamano: int = 50, columnas: dict[str, list[str]] | None = None) -> dict:
+    """Productos con filtros. `atributos`: {"color": "ROJO", "peso__min": "2", "peso__max": "5 kg"}
+    (sobre el producto o cualquiera de sus variantes). `orden`: "campo", "-campo" o "campo:asc|desc"."""
+    filtros = _filtros(db, q, tipo_id, estado_id, categoria_id, atributos, columnas)
+    total = db.scalar(_con_columnas(select(func.count(Producto.id))).where(*filtros))
+    campo, _, direccion = (orden or "codigo").partition(":")
+    desc = direccion == "desc" or campo.startswith("-")
+    col = ORDEN.get(campo.lstrip("-"))
     if col is None:
         raise invalido(f"Orden no válido: use {', '.join(ORDEN)}.")
-    consulta = (select(Producto).where(*filtros)
+    consulta = (_con_columnas(select(Producto)).where(*filtros)
                 .options(selectinload(Producto.tipo), selectinload(Producto.estado), selectinload(Producto.unidad),
                          selectinload(Producto.variantes).load_only(Variante.id))
-                .order_by(col.desc() if orden.startswith("-") else col, Producto.id)
+                .order_by(col.desc() if desc else col, Producto.id)
                 .offset((pagina - 1) * tamano).limit(tamano))
     return {"total": total, "pagina": pagina, "tamano": tamano, "datos": [
-        {"id": p.id, "codigo": p.codigo, "nombre": p.nombre, "tipo": p.tipo.codigo, "estado": p.estado.codigo,
-         "unidad": p.unidad.codigo, "variantes": len(p.variantes), "version": p.version}
+        {"id": p.id, "codigo": p.codigo, "nombre": p.nombre, "tipo": p.tipo.codigo, "tipo_nombre": p.tipo.nombre,
+         "estado": p.estado.codigo, "estado_nombre": p.estado.nombre, "operable": p.estado.operable,
+         "unidad": p.unidad.codigo, "variantes": len(p.variantes), "version": p.version,
+         "actualizado_en": p.actualizado_en.isoformat() if p.actualizado_en else None}
         for p in db.scalars(consulta)]}
+
+
+def valores_columna(db: Session, columna: str, buscar: str | None = None, **filtros) -> list[dict]:
+    """Valores de una columna con cuántos productos tiene cada uno, con los demás filtros puestos."""
+    if columna not in COLUMNAS_VALORES:
+        raise invalido(f"La columna {columna} no se filtra por valores.")
+    codigo, nombre = COLUMNAS_VALORES[columna]
+    condiciones = _filtros(db, filtros.get("q"), filtros.get("tipo_id"), filtros.get("estado_id"), filtros.get("categoria_id"),
+                           filtros.get("atributos"), filtros.get("columnas"), excepto=columna)
+    if buscar:
+        condiciones.append(func.lower(nombre).contains(buscar.strip().lower(), autoescape=True))
+    filas = db.execute(_con_columnas(select(codigo, nombre, func.count(Producto.id))).where(*condiciones)
+                       .group_by(codigo, nombre).order_by(nombre))
+    return [{"valor": c, "texto": n, "n": k} for c, n, k in filas]
 
 
 def _subcategorias(db: Session, categoria_id: int) -> set[int]:

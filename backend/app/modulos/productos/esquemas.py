@@ -216,3 +216,20 @@ class RelacionEntrada(Entrada):
 
 class RevisionAlta(Entrada):
     motivo: str | None = Field(default=None, max_length=500)
+
+
+# ---- Asistente: alta completa en un solo paso --------------------------------------------
+class IdentificadorAsistente(Entrada):
+    tipo_id: int
+    valor: str = Field(min_length=1, max_length=100)
+    presentacion_codigo: str | None = None  # de una de las presentaciones del mismo alta
+
+
+class AsistenteEntrada(Entrada):
+    """Todo lo que junta el asistente de alta: se guarda junto o no se guarda nada."""
+
+    producto: ProductoAlta
+    estado_id: int | None = None  # estado final; sin él queda en el estado inicial
+    variantes: list[VarianteAlta] = Field(default_factory=list)
+    presentaciones: list[PresentacionEntrada] = Field(default_factory=list)
+    identificadores: list[IdentificadorAsistente] = Field(default_factory=list)

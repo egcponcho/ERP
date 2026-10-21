@@ -5,10 +5,11 @@
 """
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.orm import Session
 
 from app.core import referencias
+from app.modulos.productos import asistente
 from app.modulos.productos import complementos as comp
 from app.modulos.productos import configuracion as conf
 from app.modulos.productos import esquemas as e
@@ -16,6 +17,7 @@ from app.modulos.productos import productos as prod
 from app.web.dependencias import obtener_db
 
 DB = Annotated[Session, Depends(obtener_db)]
+Codigos = Annotated[list[str] | None, Query()]  # parámetro repetible: ?tipo=A&tipo=B
 
 router = APIRouter(prefix="/api/productos", tags=["productos"])
 config = APIRouter(prefix="/api/productos/config", tags=["productos: configuración"])
@@ -129,15 +131,37 @@ def fijar_transiciones(db: DB, estado_id: int, datos: e.TransicionesEntrada):
 
 
 # ---- Productos ----------------------------------------------------------------------------
-NO_ATRIBUTOS = {"q", "tipo_id", "estado_id", "categoria_id", "orden", "pagina", "tamano"}
-
-
 @router.get("")
 def listar(db: DB, request: Request, q: str | None = None, tipo_id: int | None = None, estado_id: int | None = None,
-           categoria_id: int | None = None, orden: str = "codigo", pagina: int = 1, tamano: int = 50):
-    """Los demás parámetros `a.<atributo>` filtran por atributo: a.color=ROJO, a.peso__min=2, a.peso__max=5 kg."""
+           categoria_id: int | None = None, orden: str = "codigo", pagina: int = 1, tamano: int = 50,
+           tipo: Codigos = None, estado: Codigos = None, unidad: Codigos = None):
+    """Filtros por columna (uno o varios códigos): tipo, estado, unidad. Los parámetros `a.<atributo>`
+    filtran por atributo: a.color=ROJO, a.peso__min=2, a.peso__max=5 kg."""
     atributos = {k[2:]: v for k, v in request.query_params.items() if k.startswith("a.")}
-    return prod.listar(db, q, tipo_id, estado_id, categoria_id, atributos, orden, max(pagina, 1), min(max(tamano, 1), 200))
+    return prod.listar(db, q, tipo_id, estado_id, categoria_id, atributos, orden, max(pagina, 1), min(max(tamano, 1), 200),
+                       {"tipo": tipo or [], "estado": estado or [], "unidad": unidad or []})
+
+
+@router.get("/valores/{columna}")
+def valores(db: DB, request: Request, columna: str, buscar: str | None = None, q: str | None = None,
+            categoria_id: int | None = None, tipo: Codigos = None, estado: Codigos = None,
+            unidad: Codigos = None):
+    """Valores de una columna (tipo, estado, unidad) con cuántos productos tiene cada uno, con los demás filtros."""
+    atributos = {k[2:]: v for k, v in request.query_params.items() if k.startswith("a.")}
+    return prod.valores_columna(db, columna, buscar, q=q, categoria_id=categoria_id, atributos=atributos,
+                                columnas={"tipo": tipo or [], "estado": estado or [], "unidad": unidad or []})
+
+
+@router.post("/asistente", status_code=status.HTTP_201_CREATED)
+def crear_con_asistente(db: DB, datos: e.AsistenteEntrada, validar: bool = False):
+    """Alta completa (producto, variantes, presentaciones, códigos y estado) en una sola transacción.
+    Con validar=true se revisa todo y no se guarda nada (vista previa del último paso)."""
+    res = asistente.ejecutar(db, datos)
+    if validar:
+        db.rollback()
+        return {**res, "id": None, "validado": True}
+    db.commit()
+    return res
 
 
 @router.get("/por-identificador")
