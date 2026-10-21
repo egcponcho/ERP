@@ -1,7 +1,7 @@
 # Fly.io: la interfaz y la API en una sola máquina, desde el Dockerfile.
 # Cambie `app` por un nombre libre (o use `fly launch --copy-config --no-deploy`)
 # y `primary_region` por la región más cercana (`fly platform regions`).
-app = "erp-productos"
+app = "erp-4iujba"
 primary_region = "dfw"
 
 [build]

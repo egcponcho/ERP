@@ -1,11 +1,10 @@
-# Despliegue en Fly.io en cada push a la rama del ERP. Necesita el secreto
-# FLY_API_TOKEN en GitHub (Settings → Secrets and variables → Actions); sin él,
-# el trabajo se salta en lugar de fallar.
+# Despliegue manual en Fly.io desde GitHub (Actions → Desplegar en Fly.io → Run
+# workflow). No corre en cada push porque la app ya se despliega sola desde el
+# panel de Fly; dos despliegues a la vez chocan («failed to get lease on VM»).
+# Necesita el secreto FLY_API_TOKEN en GitHub; sin él no hace nada.
 name: Desplegar en Fly.io
 
 on:
-  push:
-    branches: [productos-base, main]
   workflow_dispatch:
 
 concurrency:

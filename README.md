@@ -109,7 +109,9 @@ fly launch --copy-config --no-deploy    # usa este fly.toml; elija un nombre lib
 
 **3. Despliegue:** `fly deploy`. Queda en `https://<nombre>.fly.dev`. Al arrancar se aplican las migraciones y se carga la configuración sugerida que falte (`CARGAR_CONFIG_BASE` en `fly.toml`).
 
-**Despliegue automático desde GitHub** (`.github/workflows/fly.yml`): cada push a `productos-base` o `main` despliega en Fly.io. Para activarlo, genere un token con `fly tokens create deploy -x 999999h` (copie todo, incluido `FlyV1 `) y guárdelo en GitHub → *Settings → Secrets and variables → Actions* con el nombre `FLY_API_TOKEN`. Sin ese secreto, el flujo no hace nada.
+**Desde el panel de Fly** (*Launch an app from GitHub*), Fly despliega solo cada push a la rama elegida. Si se usa eso, no hace falta nada más. **Despliegue manual desde GitHub** (`.github/workflows/fly.yml`, *Actions → Desplegar en Fly.io → Run workflow*): no corre en cada push para no chocar con el del panel. Para usarlo, genere un token con `fly tokens create deploy -x 999999h` (copie todo, incluido `FlyV1 `) y guárdelo en GitHub → *Settings → Secrets and variables → Actions* con el nombre `FLY_API_TOKEN`. Sin ese secreto, el flujo no hace nada.
+
+Si un despliegue falla con `failed to get lease on VM … lease currently held by …`, había otra operación sobre la misma máquina (otro despliegue o un cambio de secretos). Espere a la hora que indica `expires at` (un par de minutos) y vuelva a intentar.
 
 ## En la nube (Render)
 
