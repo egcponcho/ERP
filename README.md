@@ -66,6 +66,21 @@ Vue 3 + Vite, sin librerías de componentes (íconos SVG propios), en `frontend/
 - `modulos/productos/`: lista con filtros por atributo, alta en dos pasos y ficha con pestañas (variantes, presentaciones, identificadores, relaciones, revisiones).
 - `modulos/configuracion/`: tipos de producto (con herencia y vista previa de la ficha), atributos, categorías, unidades, estados, identificadores y relaciones.
 
+## En la nube (Railway)
+
+El repositorio incluye `railway.json`: Railway compila el `Dockerfile` (interfaz + API) y revisa `/api/salud` antes de dar por bueno cada despliegue.
+
+1. En https://railway.com/new elija **Deploy from GitHub repo** y seleccione este repositorio.
+2. En el servicio creado, **Settings → Source**, elija la rama que quiere desplegar.
+3. En el proyecto, **+ Create → Database → PostgreSQL**.
+4. En el servicio de la app, **Variables**, agregue:
+   - `DATABASE_URL` = `${{Postgres.DATABASE_URL}}` (referencia a la base del paso 3)
+   - `CARGAR_CONFIG_BASE` = `1`
+   - `FORWARDED_ALLOW_IPS` = `*`
+5. **Settings → Networking → Generate Domain**: Railway le da una dirección pública `https://….up.railway.app`.
+
+Cada push a la rama elegida se despliega solo. Al arrancar se aplican las migraciones y se carga la configuración sugerida que falte.
+
 ## En la nube (Render)
 
 El repositorio incluye `render.yaml`, que crea el servicio web desde el `Dockerfile`. **No crea la base de datos**, porque Render permite una sola base gratuita por cuenta. La base se indica en `DATABASE_URL`.
