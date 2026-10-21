@@ -2,7 +2,7 @@
 # Cambie `app` por un nombre libre (o use `fly launch --copy-config --no-deploy`)
 # y `primary_region` por la región más cercana (`fly platform regions`).
 app = "erp-4iujba"
-primary_region = "dfw"
+primary_region = "ams"
 
 [build]
   dockerfile = "Dockerfile"
@@ -30,4 +30,4 @@ primary_region = "dfw"
 
 [[vm]]
   size = "shared-cpu-1x"
-  memory = "512mb"
+  memory = "1gb"
