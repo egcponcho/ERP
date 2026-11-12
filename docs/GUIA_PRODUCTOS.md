@@ -32,22 +32,24 @@ Supongamos una empresa que vende botas.
 
 ## Dónde está cada cosa
 
-En el menú lateral hay una sola entrada, **Productos**. Así el menú no se
-satura cuando se agreguen más módulos (compras, ventas, inventario…). Todo
-lo de productos vive adentro, en tres pestañas, y el botón **Nuevo producto**
-está siempre a la vista:
+En el menú hay una sola entrada, **Productos**. Así no se satura cuando se
+agreguen más módulos (compras, ventas, inventario…). En la computadora el
+menú es la barra lateral; en el celular, la barra de pestañas de abajo, como
+en una app de iPhone. Todo lo de productos vive adentro, en un control
+segmentado de tres apartados, y **Nuevo producto** está siempre a la vista
+(en el celular, el botón redondo «+»):
 
 ```
-Menú lateral            Productos
- Inicio                  ┌──────────────────────────────────────────────────┐
- MÓDULOS                 │ Resumen   Catálogo   Configuración  [+ Nuevo producto] │
- ▸ Productos             └──────────────────────────────────────────────────┘
+Barra lateral        Productos
+ Inicio               ( Resumen | Catálogo | Configuración )      [+ Nuevo producto]
+ Productos
 ```
 
 - **Inicio** es el tablero general del ERP: una tarjeta por módulo con sus
   cifras clave y la actividad reciente.
 - Arriba, las **migas de pan** dicen dónde está y permiten volver con un
-  clic, por ejemplo: `Productos / Catálogo / Bota de trabajo dieléctrica`.
+  clic, por ejemplo: `Productos › Catálogo › Bota de trabajo dieléctrica`.
+  En el celular se ve solo «‹ Catálogo», que lleva un nivel atrás.
 - Casi nada se abre en ventanas emergentes. Los formularios se abren en la
   misma página, las filas se editan al desplegarlas y para borrar, el mismo
   botón pregunta «¿Borrar? Sí / No».

@@ -201,7 +201,7 @@ La documentación interactiva está en `/docs`.
 
 - **Por qué EAV tipado y no JSON.** Una columna JSON es más simple, pero no
   tiene llaves foráneas ni índices normales, y fue el origen de los valores
-  huérfanos en `facturacion` (ver `AUDITORIA_PRODUCTOS.md`). El costo es que
+  huérfanos en `facturacion` (ver `DESDE_FACTURACION.md`). El costo es que
   una ficha se arma con varias filas; las consultas cargan los valores con
   JOIN o `selectin`, así que no hay una consulta por atributo.
 - **`referencia_id` no tiene llave foránea**, porque puede apuntar a
@@ -215,13 +215,34 @@ La documentación interactiva está en `/docs`.
 - **Sin autenticación todavía.** La API trabaja en la organización
   `ORGANIZACION_POR_DEFECTO`. Al incorporar el módulo de acceso, la
   organización saldrá del usuario autenticado y solo cambia
-  `app/web/dependencias.py`.
+  `app/core/sesion.py`.
+
+## Archivos del módulo
+
+`backend/app/modulos/productos/` (cada archivo tiene arriba su explicación):
+
+| Archivo | Responsabilidad |
+|---|---|
+| `modulo.py` | Contrato del módulo: rutas, tablas, datos sugeridos y lo que ofrece a otros módulos |
+| `modelos.py` | Tablas |
+| `esquemas.py` | Entradas de la API (Pydantic) |
+| `esquema.py` | Esquema efectivo de un tipo (herencia de atributos) |
+| `valores.py` | Conversión y validación de un valor según su tipo de dato |
+| `configuracion.py` | Catálogos de configuración |
+| `soporte.py` | Piezas que comparten los servicios (buscar, versión, escribir valores) |
+| `lectura.py` | La ficha que devuelve la API y lo que falta para completarla |
+| `productos.py` | Alta, edición, categorías, cambio de tipo, estado y baja |
+| `variantes.py` | Variantes (SKU), firma y código |
+| `complementos.py` | Presentaciones, identificadores, relaciones y revisiones |
+| `busqueda.py` | Lista con filtros, valores por columna y tablero |
+| `asistente.py` | Alta completa en una transacción |
+| `instalacion.py` + `datos/base.json` | Configuración sugerida, neutra |
+| `api.py` | Rutas HTTP |
 
 ## Siguientes pasos sugeridos
 
-1. Interfaz (Vue 3): configuración de atributos y tipos, y un formulario de
-   producto armado desde `/esquema`.
-2. Módulo de acceso (usuarios, roles, permisos por organización).
-3. Los maestros que pida el siguiente módulo (por ejemplo marcas o
-   proveedores), registrados como entidades referenciables.
-4. Importación y exportación masiva (Excel) usando el mismo esquema.
+1. Módulo de acceso (usuarios, roles, permisos por organización).
+2. Terceros (clientes y proveedores) como módulo propio, registrado como
+   entidad referenciable para que un atributo de producto pueda apuntar a un
+   proveedor sin que el producto «pertenezca» a uno.
+3. Importación y exportación masiva (Excel) usando el mismo esquema.
