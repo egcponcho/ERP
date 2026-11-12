@@ -1,20 +1,25 @@
-"""Aplicación FastAPI: rutas de los módulos y errores como {mensaje, codigo, detalle}."""
+"""Aplicación FastAPI.
+
+Arma la API a partir de los módulos activos (core/modulos.py): no hay que
+tocar este archivo para agregar o quitar un módulo. También traduce los
+errores a {mensaje, codigo, detalle} y, si la interfaz está compilada, la sirve.
+"""
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm.exc import StaleDataError
 
+from app.core import modulos
 from app.core.config import settings
 from app.core.errores import ErrorNegocio
-from app.modelos import importar_todo
-from app.modulos.productos import api as productos
 
-importar_todo()
+modulos.importar_modelos()
 
-app = FastAPI(title="ERP", version="0.1.0")
+app = FastAPI(title="ERP", version="0.2.0")
 
 
+# ---- Errores: siempre {mensaje, codigo, detalle} -----------------------------------------
 @app.exception_handler(ErrorNegocio)
 def _error_negocio(_request: Request, exc: ErrorNegocio):
     return JSONResponse({"mensaje": exc.mensaje, "codigo": exc.codigo, "detalle": exc.detalle}, status_code=exc.status)
@@ -32,14 +37,21 @@ def _validacion(_request: Request, exc: RequestValidationError):
     return JSONResponse({"mensaje": "Revise los datos.", "codigo": "validacion", "detalle": detalle}, status_code=422)
 
 
+# ---- Rutas generales y de cada módulo ----------------------------------------------------
 @app.get("/api/salud")
 def salud():
     return {"estado": "ok"}
 
 
-# La configuración va antes: /api/productos/config/... no debe tomarse como /api/productos/{producto_id}
-app.include_router(productos.config)
-app.include_router(productos.router)
+@app.get("/api/modulos")
+def modulos_activos():
+    """Los módulos activos: la interfaz muestra solo estos en el menú."""
+    return [m.resumen() for m in modulos.cargar()]
+
+
+for _m in modulos.cargar():
+    for _router in _m.rutas():
+        app.include_router(_router)
 
 
 # ---- Interfaz ----------------------------------------------------------------------------

@@ -14,10 +14,11 @@ from sqlalchemy.orm import Session
 
 from app.core import integridad
 from app.core.errores import ErrorNegocio, invalido
-from app.modulos.productos import complementos, productos
+from app.modulos.productos import complementos, lectura, productos, variantes
 from app.modulos.productos import esquema as esq
 from app.modulos.productos import esquemas as e
 from app.modulos.productos.modelos import Presentacion
+from app.modulos.productos.soporte import obtener
 
 
 def _con_prefijo(ex: ErrorNegocio, prefijo: str) -> list[dict]:
@@ -36,7 +37,7 @@ def ejecutar(db: Session, datos: e.AsistenteEntrada) -> dict:
         if ex.status not in (404, 409, 422):
             raise
         raise invalido("Revise los datos del producto.", _con_prefijo(ex, "producto")) from ex
-    p = productos.obtener(db, creado["id"])
+    p = obtener(db, creado["id"])
     errores: list[dict] = []
 
     if datos.variantes:
@@ -44,7 +45,7 @@ def ejecutar(db: Session, datos: e.AsistenteEntrada) -> dict:
         for i, v in enumerate(datos.variantes):
             try:
                 with db.begin_nested():
-                    nueva = productos._nueva_variante(db, p, e_, v)
+                    nueva = variantes.nueva_variante(db, p, e_, v)
                     db.add(nueva)
                     db.flush()
             except ErrorNegocio as ex:
@@ -87,4 +88,4 @@ def ejecutar(db: Session, datos: e.AsistenteEntrada) -> dict:
             raise invalido(ex.mensaje, _con_prefijo(ex, "estado")) from ex
     integridad.guardar(db)
     db.refresh(p)
-    return productos.detalle(db, p)
+    return lectura.detalle(db, p)

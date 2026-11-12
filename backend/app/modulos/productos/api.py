@@ -1,22 +1,21 @@
-"""Rutas del módulo de productos.
+"""Rutas del módulo de productos (solo HTTP: leen la entrada, llaman al servicio y confirman).
 
 /api/productos/config/...   catálogos de configuración (unidades, atributos, tipos…)
 /api/productos/...          productos, variantes, presentaciones, identificadores, relaciones y revisiones
 """
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Query, Request, status
 
 from app.core import referencias
-from app.modulos.productos import asistente
+from app.core.sesion import DB
+from app.modulos.productos import asistente, busqueda, lectura, variantes
 from app.modulos.productos import complementos as comp
 from app.modulos.productos import configuracion as conf
 from app.modulos.productos import esquemas as e
 from app.modulos.productos import productos as prod
-from app.web.dependencias import obtener_db
+from app.modulos.productos.soporte import obtener
 
-DB = Annotated[Session, Depends(obtener_db)]
 Codigos = Annotated[list[str] | None, Query()]  # parámetro repetible: ?tipo=A&tipo=B
 
 router = APIRouter(prefix="/api/productos", tags=["productos"])
@@ -139,14 +138,14 @@ def listar(db: DB, request: Request, q: str | None = None, tipo_id: int | None =
     filtran por atributo: a.color=ROJO, a.peso__min=2, a.peso__max=5 kg. `pendiente`: sin_codigos,
     sin_categorias o sin_presentaciones."""
     atributos = {k[2:]: v for k, v in request.query_params.items() if k.startswith("a.")}
-    return prod.listar(db, q, tipo_id, estado_id, categoria_id, atributos, orden, max(pagina, 1), min(max(tamano, 1), 200),
+    return busqueda.listar(db, q, tipo_id, estado_id, categoria_id, atributos, orden, max(pagina, 1), min(max(tamano, 1), 200),
                        {"tipo": tipo or [], "estado": estado or [], "unidad": unidad or []}, pendiente)
 
 
 @router.get("/resumen")
 def resumen(db: DB):
     """Tablero del módulo de productos."""
-    return prod.resumen(db)
+    return busqueda.resumen(db)
 
 
 @router.get("/valores/{columna}")
@@ -155,7 +154,7 @@ def valores(db: DB, request: Request, columna: str, buscar: str | None = None, q
             unidad: Codigos = None, pendiente: str | None = None):
     """Valores de una columna (tipo, estado, unidad) con cuántos productos tiene cada uno, con los demás filtros."""
     atributos = {k[2:]: v for k, v in request.query_params.items() if k.startswith("a.")}
-    return prod.valores_columna(db, columna, buscar, q=q, categoria_id=categoria_id, atributos=atributos,
+    return busqueda.valores_columna(db, columna, buscar, q=q, categoria_id=categoria_id, atributos=atributos,
                                 columnas={"tipo": tipo or [], "estado": estado or [], "unidad": unidad or []},
                                 pendiente=pendiente)
 
@@ -186,7 +185,7 @@ def crear(db: DB, datos: e.ProductoAlta):
 
 @router.get("/{producto_id}")
 def ver(db: DB, producto_id: int):
-    return prod.ver(db, producto_id)
+    return lectura.ver(db, producto_id)
 
 
 @router.patch("/{producto_id}")
@@ -211,34 +210,34 @@ def cambiar_estado(db: DB, producto_id: int, datos: e.CambioEstado):
 
 @router.get("/{producto_id}/faltantes")
 def faltantes(db: DB, producto_id: int):
-    return prod.faltantes(db, prod.obtener(db, producto_id))
+    return lectura.faltantes(db, obtener(db, producto_id))
 
 
 # ---- Variantes ----------------------------------------------------------------------------
 @router.post("/{producto_id}/variantes", status_code=status.HTTP_201_CREATED)
 def crear_variante(db: DB, producto_id: int, datos: e.VarianteAlta):
-    res = prod.crear_variante(db, producto_id, datos)
+    res = variantes.crear_variante(db, producto_id, datos)
     db.commit()
     return res
 
 
 @router.post("/{producto_id}/variantes/generar", status_code=status.HTTP_201_CREATED)
 def generar_variantes(db: DB, producto_id: int, datos: e.GenerarVariantes):
-    res = prod.generar_variantes(db, producto_id, datos)
+    res = variantes.generar_variantes(db, producto_id, datos)
     db.commit()
     return res
 
 
 @router.patch("/{producto_id}/variantes/{variante_id}")
 def editar_variante(db: DB, producto_id: int, variante_id: int, datos: e.VarianteEdicion):
-    res = prod.editar_variante(db, producto_id, variante_id, datos)
+    res = variantes.editar_variante(db, producto_id, variante_id, datos)
     db.commit()
     return res
 
 
 @router.delete("/{producto_id}/variantes/{variante_id}", status_code=status.HTTP_204_NO_CONTENT)
 def eliminar_variante(db: DB, producto_id: int, variante_id: int):
-    prod.eliminar_variante(db, producto_id, variante_id)
+    variantes.eliminar_variante(db, producto_id, variante_id)
     db.commit()
 
 

@@ -1,11 +1,16 @@
-"""Piezas compartidas de las rutas: la sesión de base de datos de la petición.
+"""Sesión de base de datos de cada petición (dependencia de FastAPI).
+
+Las rutas la piden con `db: DB` y confirman con `db.commit()` cuando escriben;
+si algo falla antes, la transacción se descarta al cerrar.
 
 Mientras no exista el módulo de acceso, la sesión trabaja en la organización
-por defecto (ORGANIZACION_POR_DEFECTO). Al incorporar acceso, la organización
-saldrá del usuario autenticado y este es el único lugar que cambia.
+por defecto (ORGANIZACION_POR_DEFECTO). Al incorporar el inicio de sesión, la
+organización saldrá del usuario autenticado y este es el único lugar que cambia.
 """
 from collections.abc import Iterator
+from typing import Annotated
 
+from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from app.core import organizacion
@@ -18,11 +23,12 @@ def organizacion_actual() -> int:
 
 
 def obtener_db() -> Iterator[Session]:
-    """Sesión de la petición. Las rutas que escriben confirman con db.commit();
-    si algo falla antes, la transacción se descarta al cerrar."""
     db = SessionLocal()
     organizacion.fijar(db, organizacion_actual())
     try:
         yield db
     finally:
         db.close()
+
+
+DB = Annotated[Session, Depends(obtener_db)]
