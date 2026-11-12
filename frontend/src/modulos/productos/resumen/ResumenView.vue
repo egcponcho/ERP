@@ -6,8 +6,8 @@
 import { computed, onMounted, ref } from 'vue'
 import { api } from '@/nucleo/api.js'
 import { avisarError } from '@/nucleo/avisos.js'
-import { catalogo } from '@/nucleo/catalogos.js'
-import { claseEstado, fecha } from '@/nucleo/formato.js'
+import { catalogo } from '@/modulos/productos/compartido/catalogos.js'
+import { claseEstado, fecha } from '@/modulos/productos/compartido/formato.js'
 import Icono from '@/componentes/Icono.vue'
 
 const r = ref(null) // GET /productos/resumen

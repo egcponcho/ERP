@@ -24,4 +24,6 @@ export default [
       'no-unused-vars': ['error', { varsIgnorePattern: '^_', argsIgnorePattern: '^_' }],
     },
   },
+  // Scripts de mantenimiento: corren en Node
+  { files: ['scripts/**', 'vite.config.js'], languageOptions: { globals: globals.node } },
 ]

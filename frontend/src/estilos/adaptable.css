@@ -1,0 +1,31 @@
+/* Capa adaptable: filtros plegables (v-filtros), objetivos táctiles y celular. */
+.filtros-toggle { display: none; }
+.filtros-toggle.con-activos { color: var(--sobre-acento); background: var(--acento); }
+
+@media (max-width: 720px) {
+  .filtros-plegables { align-items: stretch; }
+  .filtros-plegables > :first-child { order: -2; flex: 1 1 0; min-width: 0; }
+  .filtros-plegables > .filtros-toggle { display: inline-flex; order: -1; align-self: center; }
+  .filtros-plegables:not(.abiertos) > :not(:first-child):not(.filtros-toggle) { display: none !important; }
+  .filtros-plegables.abiertos > :not(:first-child):not(.filtros-toggle) { flex: 1 1 100%; max-width: none; }
+  .filtros-plegables.abiertos select { max-width: none; width: 100%; }
+  .pagina-cabeza .acciones { width: 100%; }
+  .pagina-cabeza .acciones > .btn { flex: 1 1 auto; }
+  h1 { font-size: 1.9rem; }
+  .doc-cabeza { padding: 18px; border-radius: var(--radio-panel); }
+  .doc-numero { font-size: 1.45rem; overflow-wrap: anywhere; }
+  .rejilla-campos { grid-template-columns: minmax(0, 1fr); }
+  .panel { padding: 16px; }
+}
+
+/* Pantallas táctiles: objetivos de 44 px; campos de 16 px (sin zoom en iOS) */
+@media (pointer: coarse) {
+  .btn, .pag-btn, .lateral-item, .menu-lateral .menu-item, .opcion-chip { min-height: 44px; }
+  .segmento, .pestana, .pildora { min-height: 36px; }
+  .btn-cuadrado, .pag-btn { min-width: 44px; }
+  .btn-icono { min-width: 44px; min-height: 44px; }
+  :where(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color'], [type='hidden']), select, textarea), .entrada { min-height: 44px; }
+}
+@media (max-width: 720px) {
+  :where(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color'], [type='hidden']), select, textarea), .entrada { font-size: 16px; }
+}

@@ -3,7 +3,7 @@
 // características pide y si maneja variantes) o se crea uno nuevo aquí mismo.
 import { computed, ref } from 'vue'
 import { buscador } from '@/nucleo/busqueda.js'
-import { camposDe, rutaTipo } from '@/nucleo/esquemaLocal.js'
+import { camposDe, rutaTipo } from '@/modulos/productos/compartido/esquemaLocal.js'
 import EstadoVacio from '@/componentes/EstadoVacio.vue'
 import Icono from '@/componentes/Icono.vue'
 import CreadorTipo from './CreadorTipo.vue'

@@ -1,4 +1,5 @@
-// Cliente de la API: JSON de ida y vuelta, errores como ApiError {mensaje, codigo, detalle}.
+// Cliente de la API común a todos los módulos: JSON de ida y vuelta y errores
+// como ApiError {mensaje, codigo, detalle} (el mismo formato que devuelve el backend).
 const BASE = '/api'
 
 export class ApiError extends Error {
@@ -55,4 +56,3 @@ export const api = {
   del: (ruta) => pedir('DELETE', ruta),
 }
 
-export const CONFIG = '/productos/config'

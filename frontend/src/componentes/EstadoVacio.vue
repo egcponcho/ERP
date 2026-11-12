@@ -1,5 +1,4 @@
 <script setup>
-import { tx } from '@/nucleo/texto.js'
 import Icono from './Icono.vue'
 
 // Estado vacío que enseña: qué es esto, qué se necesita para que aparezca algo
@@ -17,11 +16,11 @@ const props = defineProps({
 <template>
   <div class="estado-vacio">
     <span class="estado-vacio-icono"><Icono :nombre="props.icono" :tam="24" /></span>
-    <h3>{{ tx(props.titulo) }}</h3>
-    <p v-if="props.texto">{{ tx(props.texto) }}</p>
+    <h3>{{ props.titulo }}</h3>
+    <p v-if="props.texto">{{ props.texto }}</p>
     <template v-if="props.requisitos.length">
-      <p v-if="props.tituloRequisitos" class="estado-vacio-sub">{{ tx(props.tituloRequisitos) }}</p>
-      <ul><li v-for="r in props.requisitos" :key="r"><Icono nombre="check" :tam="14" />{{ tx(r) }}</li></ul>
+      <p v-if="props.tituloRequisitos" class="estado-vacio-sub">{{ props.tituloRequisitos }}</p>
+      <ul><li v-for="r in props.requisitos" :key="r"><Icono nombre="check" :tam="14" />{{ r }}</li></ul>
     </template>
     <div v-if="$slots.default" class="fila-flex estado-vacio-acciones"><slot /></div>
   </div>

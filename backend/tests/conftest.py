@@ -8,10 +8,10 @@ from sqlalchemy.pool import StaticPool
 from app.core import organizacion
 from app.core.db import crear_motor
 from app.core.modelo import Base
+from app.core.modulos import instalar
 from app.core.organizacion import Organizacion
+from app.core.sesion import obtener_db
 from app.main import app
-from app.modulos.productos.instalacion import cargar_base
-from app.web.dependencias import obtener_db
 
 # Con TEST_DATABASE_URL (p. ej. postgresql+psycopg://erp@localhost/erp_test) las pruebas corren en esa
 # base, que se vacía en cada prueba; sin ella, en SQLite en memoria.
@@ -29,7 +29,7 @@ def fabrica():
         db.commit()
         for org in (1, 2):
             organizacion.fijar(db, org)
-            cargar_base(db)
+            instalar(db)
             db.commit()
     yield fabrica
     motor.dispose()

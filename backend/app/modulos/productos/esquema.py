@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.core.errores import invalido
 from app.modulos.productos.modelos import Atributo, TipoProducto, TipoProductoAtributo
+from app.modulos.productos.valores import atributo_dict
 
 
 @dataclass
@@ -104,8 +105,6 @@ def descendientes(db: Session, tipo_id: int) -> set[int]:
 
 
 def a_dict(e: Esquema) -> dict:
-    from app.modulos.productos.valores import atributo_dict
-
     return {
         "tipo": {"id": e.tipo.id, "codigo": e.tipo.codigo, "nombre": e.tipo.nombre},
         "ruta": [t.codigo for t in e.ruta],

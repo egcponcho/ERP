@@ -1,0 +1,172 @@
+/* Controles: botones, campos, casillas e interruptores, segmentos y pestañas. */
+
+/* ---- Botones ----------------------------------------------------------------
+   .btn          relleno gris con texto azul (botón «tinted» de iOS)
+   .btn-primario relleno azul: uno por pantalla
+   .btn-fantasma solo texto azul
+   .btn-peligro  texto rojo
+   Al pulsar se atenúan y se encogen un poco, como en iOS. */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; background: var(--relleno);
+  color: var(--acento-texto); padding: 8px 16px; min-height: 38px; border-radius: var(--radio); font-weight: 600; font-size: 0.94rem;
+  text-decoration: none !important; white-space: nowrap; touch-action: manipulation; user-select: none;
+  transition: background var(--rapido), opacity var(--rapido), transform var(--rapido) var(--resorte);
+}
+.btn:hover:not(:disabled) { background: var(--relleno-2); }
+.btn:active:not(:disabled) { opacity: 0.7; transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primario { background: var(--acento); color: var(--sobre-acento); }
+.btn-primario:hover:not(:disabled) { background: var(--acento-hover); }
+.btn-peligro { color: var(--error); }
+.btn-peligro:hover:not(:disabled) { background: var(--error-fondo); }
+.btn-chico { padding: 4px 12px; min-height: 30px; font-size: 0.86rem; border-radius: var(--radio-chico); }
+.btn-cuadrado { padding: 0; width: 38px; min-width: 38px; }
+.btn-chico.btn-cuadrado { width: 30px; min-width: 30px; }
+.btn-fantasma { background: transparent; }
+.btn-fantasma:hover:not(:disabled) { background: var(--relleno); }
+.btn-texto { background: none; border: 0; color: var(--acento-texto); padding: 4px 6px; font-size: 0.94rem; font-weight: 500; border-radius: 6px; }
+.btn-texto:hover { text-decoration: underline; }
+.btn-icono {
+  background: none; border: 0; line-height: 1; min-width: 34px; min-height: 34px; padding: 6px; color: var(--tinta-3);
+  border-radius: 50%; display: inline-grid; place-items: center; transition: background var(--rapido), color var(--rapido);
+}
+.btn-icono:hover { background: var(--relleno); color: var(--tinta); }
+.btn-icono:active { opacity: 0.6; }
+
+/* ---- Campos: rellenos, sin contorno (como los de iOS) -------------------------- */
+.campo { display: flex; flex-direction: column; gap: 6px; font-size: 0.86rem; color: var(--tinta-2); min-width: 0; }
+.campo > span { font-weight: 600; }
+.campo .ayuda { font-weight: 400; }
+:where(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color'], [type='hidden'], [type='submit'], [type='button']), select, textarea),
+.entrada {
+  border: 1px solid transparent; border-radius: var(--radio); padding: 8px 12px; min-height: 38px; background: var(--relleno); color: var(--tinta);
+  min-width: 0; font: inherit; font-size: 0.95rem; transition: background var(--rapido), box-shadow var(--rapido), border-color var(--rapido);
+}
+/* Dentro de una tarjeta gris (o en la página) el relleno gris se pierde: ahí el campo es blanco */
+:where(.filtros, .barra-tabla, .pagina-cabeza, .fila-hija, .filtros-avanzados) :where(input:not([type='checkbox'], [type='radio']), select),
+.superficie-gris :where(input:not([type='checkbox'], [type='radio']), select, textarea) { background: var(--superficie); }
+:where(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color'], [type='hidden']), select, textarea):hover,
+.entrada:hover { background: var(--relleno-2); }
+:where(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color'], [type='hidden']), select, textarea):focus,
+.entrada:focus { outline: none; background: var(--superficie); border-color: var(--acento); box-shadow: 0 0 0 3px var(--foco); }
+select:where(:not([multiple])) {
+  appearance: none; padding-inline-end: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 9 5-5 5 5M7 15l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+}
+:where(textarea) { resize: vertical; }
+.campo textarea { min-height: 80px; }
+:is(input, textarea)::placeholder { color: var(--tinta-3); opacity: 1; }
+:is(input, select, textarea):disabled { opacity: 0.55; cursor: not-allowed; }
+.entrada-chica { min-height: 30px; padding: 4px 10px; font-size: 0.86rem; border-radius: var(--radio-chico); }
+.entrada.num, input.num { text-align: end; font-variant-numeric: tabular-nums; }
+.rejilla-campos { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px 18px; }
+.ayuda { font-size: 0.86rem; color: var(--tinta-3); }
+.req::after { content: ' *'; color: var(--error); font-weight: 700; }
+.campo-error { color: var(--error); font-size: 0.84rem; font-weight: 500; display: flex; gap: 4px; align-items: flex-start; }
+.con-error :is(.entrada, input:not([type='checkbox']), select, textarea) { border-color: var(--error); background: var(--error-fondo); }
+.valor-fijo { min-height: 38px; display: flex; align-items: center; font-weight: 600; }
+
+/* ---- Casillas (círculo con marca, como la selección de iOS) -------------------- */
+input[type='checkbox'], input[type='radio'] {
+  appearance: none; margin: 0; width: 22px; height: 22px; flex: none; border-radius: 50%; border: 1.5px solid var(--borde-hover);
+  background: var(--superficie); display: inline-grid; place-items: center; vertical-align: middle;
+  transition: background var(--rapido), border-color var(--rapido), transform var(--rapido) var(--resorte);
+}
+input[type='checkbox']::after, input[type='radio']::after {
+  content: ''; width: 12px; height: 12px; background: #fff; transform: scale(0); transition: transform var(--rapido) var(--resorte);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+:is(input[type='checkbox'], input[type='radio']):checked { background: var(--acento); border-color: var(--acento); }
+:is(input[type='checkbox'], input[type='radio']):checked::after { transform: scale(1); }
+:is(input[type='checkbox'], input[type='radio']):active:not(:disabled) { transform: scale(0.9); }
+:is(input[type='checkbox'], input[type='radio']):disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ---- Interruptores: una casilla dentro de .check (ajustes sí/no) -----------------
+   El texto va a la izquierda y el interruptor a la derecha, como en Ajustes. */
+.check { display: inline-flex; align-items: center; gap: 10px; font-size: 0.95rem; min-height: 34px; }
+.check > input[type='checkbox'] {
+  width: 46px; height: 28px; border-radius: 999px; border: 0; background: var(--relleno-2); position: relative; display: inline-block;
+  transition: background var(--normal) var(--resorte);
+}
+.check > input[type='checkbox']::after {
+  content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%; background: #fff;
+  -webkit-mask: none; mask: none; transform: none; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.16);
+  transition: transform var(--normal) var(--resorte);
+}
+.check > input[type='checkbox']:checked { background: #34c759; }
+.check > input[type='checkbox']:checked::after { transform: translateX(18px); }
+.check > input[type='checkbox']:active:not(:disabled) { transform: none; }
+.check > input[type='checkbox']:active:not(:disabled)::after { width: 28px; }
+.check > input[type='checkbox']:checked:active:not(:disabled)::after { transform: translateX(14px); }
+/* En los menús de columnas y filtros se elige de una lista: casilla redonda, no interruptor */
+:is(.sel-columnas-op, .fc-op, .fc-lista) > input[type='checkbox'], .sel-columnas .check > input[type='checkbox'] {
+  width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--borde-hover); background: var(--superficie); display: inline-grid;
+}
+:is(.sel-columnas-op, .fc-op, .fc-lista) > input[type='checkbox']::after, .sel-columnas .check > input[type='checkbox']::after {
+  position: static; width: 12px; height: 12px; box-shadow: none; transform: scale(0);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+:is(.sel-columnas-op, .fc-op, .fc-lista) > input[type='checkbox']:checked, .sel-columnas .check > input[type='checkbox']:checked { background: var(--acento); border-color: var(--acento); }
+:is(.sel-columnas-op, .fc-op, .fc-lista) > input[type='checkbox']:checked::after, .sel-columnas .check > input[type='checkbox']:checked::after { transform: scale(1); }
+
+/* ---- Control segmentado (también las pestañas de una ficha) ------------------- */
+.segmentos, .pestanas-pildora, .pestanas {
+  display: inline-flex; gap: 2px; padding: 2px; background: var(--relleno); border-radius: 10px; max-width: 100%;
+  overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap;
+}
+.segmentos::-webkit-scrollbar, .pestanas::-webkit-scrollbar { display: none; }
+.pestanas { display: flex; width: fit-content; margin: 20px 0 18px; }
+.pestanas-pildora { margin-bottom: var(--e-4); }
+.segmento, .pildora, .pestana {
+  border: 0; background: none; color: var(--tinta); border-radius: 8px; padding: 6px 14px; min-height: 32px; font-weight: 500;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.9rem; text-decoration: none !important;
+  white-space: nowrap; transition: background var(--normal) var(--resorte), box-shadow var(--normal), color var(--rapido);
+}
+.segmento:hover, .pildora:hover, .pestana:hover { background: color-mix(in srgb, var(--superficie) 45%, transparent); }
+.segmento:is([aria-pressed='true'], [aria-current]), .pildora:is([aria-pressed='true'], [aria-selected='true']),
+.pestana:is([aria-selected='true'], [aria-current]) {
+  background: var(--superficie); color: var(--tinta); font-weight: 600; box-shadow: var(--sombra-segmento);
+}
+:root[data-theme='dark'] :is(.segmento:is([aria-pressed='true'], [aria-current]), .pildora:is([aria-pressed='true'], [aria-selected='true']), .pestana:is([aria-selected='true'], [aria-current])) { background: #636366; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) :is(.segmento:is([aria-pressed='true'], [aria-current]), .pildora:is([aria-pressed='true'], [aria-selected='true']), .pestana:is([aria-selected='true'], [aria-current])) { background: #636366; }
+}
+.segmentos-chicos .segmento { min-height: 28px; padding: 4px 12px; flex: 1 1 0; }
+.segmentos-chicos { width: 100%; }
+:is(.pildora, .segmento, .pestana) .cuenta { font-size: 0.74rem; font-weight: 600; background: var(--relleno-2); color: var(--tinta-2); border-radius: 10px; padding: 0 7px; font-variant-numeric: tabular-nums; }
+.pestana .cuenta.alerta { background: var(--aviso-fondo); color: var(--aviso); }
+
+/* ---- Búsqueda y filtros --------------------------------------------------------- */
+.filtros { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.filtros select { max-width: 240px; }
+.buscador { position: relative; display: inline-flex; align-items: center; }
+.buscador svg { position: absolute; inset-inline-start: 10px; color: var(--tinta-3); pointer-events: none; }
+.buscador input { padding-inline-start: 34px !important; min-width: 300px; }
+@media (max-width: 600px) { .buscador, .buscador input { min-width: 0; width: 100%; } }
+
+/* ---- Chips de filtros activos y opciones como cápsulas ------------------------- */
+.chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; background: var(--acento-claro); color: var(--acento-texto); border-radius: 999px; padding: 3px 4px 3px 12px; font-size: 0.85rem; font-weight: 600; }
+.chip button { border: 0; background: none; color: inherit; display: grid; place-items: center; min-width: 22px; min-height: 22px; border-radius: 50%; }
+.chip button:hover { background: var(--acento-medio); }
+.opciones-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.opcion-chip {
+  display: inline-flex; align-items: center; gap: 5px; min-height: 34px; padding: 4px 14px; border-radius: 999px; border: 0;
+  background: var(--relleno); color: var(--tinta); font: inherit; font-size: 0.9rem; font-weight: 500;
+  transition: background var(--rapido), color var(--rapido), transform var(--rapido) var(--resorte);
+}
+.opcion-chip:hover { background: var(--relleno-2); }
+.opcion-chip:active { transform: scale(0.96); }
+.opcion-chip:is([aria-pressed='true'], [aria-checked='true']) { background: var(--acento); color: var(--sobre-acento); font-weight: 600; }
+
+/* ---- Celda editable --------------------------------------------------------------- */
+.celda { width: 100%; min-width: 60px; border: 1px solid transparent; background: transparent; border-radius: var(--radio-chico); padding: 4px 8px; font-variant-numeric: tabular-nums; }
+.celda:not(:disabled):not([readonly]) { background: var(--relleno); }
+.celda:not(:disabled):not([readonly]):hover { background: var(--relleno-2); }
+.celda:focus { border-color: var(--acento); background: var(--superficie); outline: none; box-shadow: 0 0 0 3px var(--foco); }
+.celda.num { text-align: end; }
+.celda.guardando { color: var(--tinta-3); }
+.celda.error { border-color: var(--error); background: var(--error-fondo); }

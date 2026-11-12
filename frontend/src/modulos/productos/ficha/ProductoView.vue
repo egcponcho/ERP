@@ -4,10 +4,11 @@
 // edita en la misma página.
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { api, CONFIG } from '@/nucleo/api.js'
+import { api } from '@/nucleo/api.js'
+import { CONFIG } from '@/modulos/productos/compartido/api.js'
 import { avisar, avisarError } from '@/nucleo/avisos.js'
-import { catalogo } from '@/nucleo/catalogos.js'
-import { claseEstado, fecha } from '@/nucleo/formato.js'
+import { catalogo } from '@/modulos/productos/compartido/catalogos.js'
+import { claseEstado, fecha } from '@/modulos/productos/compartido/formato.js'
 import { fijarTitulo } from '@/nucleo/migas.js'
 import BotonConfirmar from '@/componentes/BotonConfirmar.vue'
 import Icono from '@/componentes/Icono.vue'
@@ -101,7 +102,7 @@ async function borrar() {
     <template v-if="producto && esquema">
       <header class="doc-cabeza">
         <div class="doc-fila">
-          <span class="doc-numero mono">{{ producto.codigo }}</span>
+          <div class="crece"><span class="doc-codigo mono">{{ producto.codigo }}</span><h1 class="doc-numero">{{ producto.nombre }}</h1></div>
           <div class="estado-menu" @keydown.esc="menuEstado = false">
             <button type="button" class="estado boton-estado" :class="claseEstado(estadoActual)" :aria-expanded="menuEstado" aria-haspopup="menu"
                     :disabled="!siguientes.length" :title="siguientes.length ? 'Cambiar estado' : ''" @click="menuEstado = !menuEstado">
@@ -119,7 +120,6 @@ async function borrar() {
             <BotonConfirmar :etiqueta="`Borrar ${producto.codigo}`" pregunta="¿Borrar el producto?" texto="Borrar" @confirmar="borrar" />
           </div>
         </div>
-        <div class="doc-sub">{{ producto.nombre }}</div>
         <div class="doc-meta">
           <span>Tipo <b><RouterLink :to="`/productos/configuracion/tipos/${producto.tipo.id}`">{{ producto.tipo.nombre }}</RouterLink></b></span>
           <span>Unidad <b>{{ producto.unidad.nombre }}</b></span>

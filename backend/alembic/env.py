@@ -4,12 +4,12 @@ from alembic import context
 from app.core.config import settings
 from app.core.db import crear_motor
 from app.core.modelo import Base
-from app.modelos import importar_todo
+from app.core.modulos import importar_modelos
 
 if context.config.config_file_name is not None:
     fileConfig(context.config.config_file_name)
 
-importar_todo()
+importar_modelos()
 url = context.config.attributes.get("url") or settings.DATABASE_URL
 
 

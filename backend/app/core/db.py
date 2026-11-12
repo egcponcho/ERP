@@ -1,3 +1,8 @@
+"""Motor y fábrica de sesiones de SQLAlchemy.
+
+En SQLite se encienden las llaves foráneas (vienen apagadas por defecto), para
+que desarrollo y pruebas protejan la integridad igual que PostgreSQL.
+"""
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 
@@ -19,4 +24,5 @@ def crear_motor(url: str, **kw):
 
 
 engine = crear_motor(settings.DATABASE_URL)
+# autoflush apagado: los servicios deciden cuándo escribir (integridad.guardar)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)

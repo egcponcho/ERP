@@ -1,12 +1,13 @@
 """Carga la configuración inicial sugerida (datos/base.json) en una organización.
 
 Solo agrega lo que no existe (por código): se puede correr de nuevo sin
-duplicar ni pisar lo que la organización ya cambió.
+duplicar ni pisar lo que la organización ya cambió. La carga
+`python -m app.instalar`, que recorre todos los módulos activos.
 
-    python -m app.modulos.productos.instalacion [organizacion_id]
+Los datos son neutros (unidades del SI, estados de ciclo de vida, EAN/UPC):
+ningún rubro viene de fábrica.
 """
 import json
-import sys
 from pathlib import Path
 
 from sqlalchemy import select
@@ -59,15 +60,3 @@ def cargar_base(db: Session, archivo: Path = BASE) -> None:
     _agregar(db, TipoRelacion, base["tipos_relacion"])
     db.flush()
 
-
-if __name__ == "__main__":
-    from app.core import organizacion
-    from app.core.db import SessionLocal
-    from app.modelos import importar_todo
-
-    importar_todo()
-    with SessionLocal() as sesion:
-        organizacion.fijar(sesion, int(sys.argv[1]) if len(sys.argv) > 1 else 1)
-        cargar_base(sesion)
-        sesion.commit()
-    print("Configuración base cargada.")

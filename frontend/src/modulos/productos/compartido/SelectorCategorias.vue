@@ -1,7 +1,7 @@
 <script setup>
 // Elegir categorías por taxonomía: una lista por taxonomía, o pastillas si la taxonomía admite varias.
 import { computed, onMounted, ref } from 'vue'
-import { catalogo } from '@/nucleo/catalogos.js'
+import { catalogo } from '@/modulos/productos/compartido/catalogos.js'
 
 const props = defineProps({ modelValue: { type: Array, required: true }, errores: { type: Object, default: () => ({}) } })
 const emit = defineEmits(['update:modelValue'])

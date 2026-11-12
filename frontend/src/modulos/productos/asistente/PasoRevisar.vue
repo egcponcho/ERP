@@ -2,8 +2,9 @@
 // Último paso: todo se valida en el servidor sin guardar (los códigos y SKU
 // reales, los problemas de cada paso) y se elige en qué estado queda el producto.
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { api, CONFIG } from '@/nucleo/api.js'
-import { valorTexto } from '@/nucleo/formato.js'
+import { api } from '@/nucleo/api.js'
+import { CONFIG } from '@/modulos/productos/compartido/api.js'
+import { valorTexto } from '@/modulos/productos/compartido/formato.js'
 import Icono from '@/componentes/Icono.vue'
 import TablaDatos from '@/componentes/TablaDatos.vue'
 import { b } from './borrador.js'

@@ -1,8 +1,8 @@
 <script setup>
 // Paso 3: las características que pide el tipo, agrupadas por sección.
 import { computed, ref } from 'vue'
-import { catalogo } from '@/nucleo/catalogos.js'
-import CampoAtributo from '@/componentes/CampoAtributo.vue'
+import { catalogo } from '@/modulos/productos/compartido/catalogos.js'
+import CampoAtributo from '@/modulos/productos/compartido/CampoAtributo.vue'
 import Icono from '@/componentes/Icono.vue'
 import { b } from './borrador.js'
 

@@ -3,10 +3,11 @@
 // a la derecha. Elegir una fila la carga en el editor; las opciones se editan
 // como líneas del mismo formulario.
 import { computed, onMounted, reactive, ref } from 'vue'
-import { api, CONFIG } from '@/nucleo/api.js'
+import { api } from '@/nucleo/api.js'
+import { CONFIG } from '@/modulos/productos/compartido/api.js'
 import { avisar, avisarError } from '@/nucleo/avisos.js'
-import { catalogo, invalidarCatalogo } from '@/nucleo/catalogos.js'
-import { TIPOS_DATO } from '@/nucleo/formato.js'
+import { catalogo, invalidarCatalogo } from '@/modulos/productos/compartido/catalogos.js'
+import { TIPOS_DATO } from '@/modulos/productos/compartido/formato.js'
 import BotonConfirmar from '@/componentes/BotonConfirmar.vue'
 import Icono from '@/componentes/Icono.vue'
 import TablaDatos from '@/componentes/TablaDatos.vue'

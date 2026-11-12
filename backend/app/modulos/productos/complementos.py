@@ -10,6 +10,7 @@ from app.core.errores import conflicto, invalido, no_existe
 from app.core.modelo import ahora
 from app.modulos.productos import esquemas as e
 from app.modulos.productos import valores as val
+from app.modulos.productos.lectura import detalle, identificador_dict, presentacion_dict, relacion_dict
 from app.modulos.productos.modelos import (
     Identificador,
     Presentacion,
@@ -20,7 +21,7 @@ from app.modulos.productos.modelos import (
     TipoRelacion,
     Variante,
 )
-from app.modulos.productos.productos import detalle, obtener
+from app.modulos.productos.soporte import obtener
 
 
 def _de_producto(db: Session, modelo, producto_id: int, id_: int, que: str):
@@ -35,31 +36,6 @@ def _variante_del_producto(db: Session, p: Producto, variante_id: int | None) ->
         v = db.get(Variante, variante_id)
         if v is None or v.producto_id != p.id:
             raise invalido("La variante no es de este producto.")
-
-
-def presentacion_dict(x: Presentacion) -> dict:
-    return {"id": x.id, "codigo": x.codigo, "nombre": x.nombre, "variante_id": x.variante_id,
-            "unidad": x.unidad.codigo, "unidad_id": x.unidad_id, "cantidad": val.numero(x.cantidad), "activa": x.activa}
-
-
-def identificador_dict(x: Identificador) -> dict:
-    return {"id": x.id, "tipo": x.tipo.codigo, "tipo_id": x.tipo_id, "valor": x.valor,
-            "variante_id": x.variante_id, "presentacion_id": x.presentacion_id}
-
-
-def relacion_dict(x: RelacionProducto) -> dict:
-    return {"id": x.id, "tipo": x.tipo.codigo, "tipo_id": x.tipo_id, "destino": {
-        "id": x.destino.id, "codigo": x.destino.codigo, "nombre": x.destino.nombre},
-        "destino_variante_id": x.destino_variante_id, "cantidad": val.numero(x.cantidad),
-        "unidad": x.unidad.codigo if x.unidad else None, "orden": x.orden}
-
-
-def de_producto(p: Producto) -> dict:
-    return {
-        "presentaciones": [presentacion_dict(x) for x in p.presentaciones],
-        "identificadores": [identificador_dict(x) for x in p.identificadores],
-        "relaciones": [relacion_dict(x) for x in p.relaciones],
-    }
 
 
 # ---- Presentaciones -----------------------------------------------------------------------

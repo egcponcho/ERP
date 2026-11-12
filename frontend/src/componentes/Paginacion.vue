@@ -1,5 +1,5 @@
 <script setup>
-import { t, tx } from '@/nucleo/texto.js'
+import { t } from '@/nucleo/texto.js'
 import { computed } from 'vue'
 import Icono from './Icono.vue'
 
@@ -27,19 +27,19 @@ const botones = computed(() => {
 
 <template>
   <div class="paginacion">
-    <span class="ayuda">{{ t('{0}–{1} of {2} records', [desde, hasta, props.total || 0]) }}</span>
-    <div class="paginas" role="navigation" :aria-label="t('Pages')">
-      <button type="button" class="pag-btn" :disabled="props.page <= 1" :aria-label="t('Previous page')" @click="emit('cambiar', props.page - 1)"><Icono nombre="atras" :tam="14" /></button>
+    <span class="ayuda">{{ t('{0}–{1} de {2} registros', [desde, hasta, props.total || 0]) }}</span>
+    <div class="paginas" role="navigation" :aria-label="t('Páginas')">
+      <button type="button" class="pag-btn" :disabled="props.page <= 1" :aria-label="t('Página anterior')" @click="emit('cambiar', props.page - 1)"><Icono nombre="atras" :tam="14" /></button>
       <template v-for="(b, i) in botones" :key="i">
         <span v-if="b === '…'" class="ayuda">…</span>
-        <button v-else type="button" class="pag-btn" :aria-current="b === props.page ? 'page' : undefined" @click="emit('cambiar', b)">{{ tx(b) }}</button>
+        <button v-else type="button" class="pag-btn" :aria-current="b === props.page ? 'page' : undefined" @click="emit('cambiar', b)">{{ b }}</button>
       </template>
-      <button type="button" class="pag-btn" :disabled="props.page >= paginas" :aria-label="t('Next page')" @click="emit('cambiar', props.page + 1)"><Icono nombre="flecha" :tam="14" /></button>
+      <button type="button" class="pag-btn" :disabled="props.page >= paginas" :aria-label="t('Página siguiente')" @click="emit('cambiar', props.page + 1)"><Icono nombre="flecha" :tam="14" /></button>
     </div>
     <label class="fila-flex ayuda gap-2">
-      {{ t('Rows per page') }}
+      {{ t('Filas por página') }}
       <select class="entrada relleno-chico" :value="props.size" @change="emit('tamano', Number($event.target.value)); emit('cambiar', 1)">
-        <option v-for="txt in props.tamanos" :key="txt" :value="txt">{{ tx(txt) }}</option>
+        <option v-for="txt in props.tamanos" :key="txt" :value="txt">{{ txt }}</option>
       </select>
     </label>
   </div>

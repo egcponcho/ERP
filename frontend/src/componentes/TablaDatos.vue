@@ -1,5 +1,5 @@
 <script setup>
-import { t, tx } from '@/nucleo/texto.js'
+import { t } from '@/nucleo/texto.js'
 import { computed, inject, nextTick, onBeforeUnmount, onMounted, reactive, ref, useSlots, watch } from 'vue'
 import { buscador } from '@/nucleo/busqueda.js'
 import { filasDefecto, guardarTabla, preferencias } from '@/nucleo/preferencias.js'
@@ -203,7 +203,7 @@ const estiloColumna = (c) => {
   const w = conf.anchos[c.clave] || c.ancho
   return w ? { width: `${w}px`, minWidth: `${w}px`, maxWidth: `${w}px` } : null
 }
-const DENSIDADES = [['compacta', t('Compact')], ['normal', t('Normal')], ['amplia', t('Comfortable')]]
+const DENSIDADES = [['compacta', t('Compacta')], ['normal', t('Normal')], ['amplia', t('Amplia')]]
 function cambiarDensidad(d) {
   conf.densidad = d
   guardar()
@@ -231,14 +231,14 @@ const etiquetas = reactive({})
 const valorDe = (c, fila) => (c.valor ? c.valor(fila) : fila[c.clave])
 const claveValor = (v) => (v === null || v === undefined || v === '' ? VACIO : String(v))
 function textoValor(c, v, fila) {
-  if (claveValor(v) === VACIO) return t('(Empty)')
+  if (claveValor(v) === VACIO) return t('(Vacío)')
   const op = c.opciones?.find((o) => String(o[0]) === String(v))
-  if (op) return tx(op[1])
+  if (op) return op[1]
   if (c.textoValor) return c.textoValor(v, fila)
-  if (typeof v === 'boolean') return v ? t('Yes') : t('No')
+  if (typeof v === 'boolean') return v ? t('Sí') : t('No')
   return String(v)
 }
-const textoElegido = (c, k) => etiquetas[c.clave]?.[k] ?? (k === VACIO ? t('(Empty)') : textoValor(c, k))
+const textoElegido = (c, k) => etiquetas[c.clave]?.[k] ?? (k === VACIO ? t('(Vacío)') : textoValor(c, k))
 
 // Filas que pasan los filtros (en modo local), sin contar el de la columna `excepto`
 function pasan(filas, excepto = null) {
@@ -285,7 +285,7 @@ async function cargarValores(c, q) {
     }
   } else {
     const coincide = buscador(q)
-    res = (c.opciones || []).map(([v, txt]) => ({ valor: v, texto: tx(txt) })).filter((x) => !q || coincide([x.texto]))
+    res = (c.opciones || []).map(([v, txt]) => ({ valor: v, texto: txt })).filter((x) => !q || coincide([x.texto]))
   }
   etiquetas[c.clave] = { ...(etiquetas[c.clave] || {}), ...Object.fromEntries(res.map((x) => [claveValor(x.valor), x.texto])) }
   return res
@@ -312,9 +312,9 @@ function limpiar() {
 }
 function textoChip([k, vals]) {
   const c = props.columnas.find((x) => x.clave === k)
-  const textos = vals.map((v) => tx(textoElegido(c || { clave: k }, v)))
+  const textos = vals.map((v) => textoElegido(c || { clave: k }, v))
   const ver = textos.slice(0, 2).join(', ') + (textos.length > 2 ? ` ${t('(+{0})', [textos.length - 2])}` : '')
-  return `${tx(c?.texto || k)}: ${ver}`
+  return `${c?.texto || k}: ${ver}`
 }
 
 function ordenar(c) {
@@ -448,67 +448,67 @@ const hayPie = computed(() => Object.keys(slots).some((k) => k.startsWith('pie-'
       <VistasGuardadas v-if="vistasGuardadas && !previa && !anidada" :pantalla="tabla" :actual="consultaActual" @aplicar="aplicarVista" />
       <slot name="filtros" />
       <button v-if="slots['mas-filtros']" type="button" class="btn btn-fantasma mas-filtros-toggle" :aria-expanded="masFiltros" @click="masFiltros = !masFiltros">
-        <Icono nombre="filtro" :tam="15" />{{ masFiltros ? t('Fewer filters') : t('More filters') }}<span v-if="masFiltrosActivos" class="cuenta">{{ masFiltrosActivos }}</span>
+        <Icono nombre="filtro" :tam="15" />{{ masFiltros ? t('Menos filtros') : t('Más filtros') }}<span v-if="masFiltrosActivos" class="cuenta">{{ masFiltrosActivos }}</span>
       </button>
       <template v-if="!previa">
-      <div v-if="!anidada" class="segmentos td-densidad" role="group" :aria-label="t('Density')">
-        <button v-for="[d, txt] in DENSIDADES" :key="d" type="button" class="segmento" :aria-pressed="conf.densidad === d" :title="tx(txt)" @click="cambiarDensidad(d)">
-          <span class="td-icono-densidad" :class="d" aria-hidden="true"></span><span class="oculto-visual">{{ tx(txt) }}</span>
+      <div v-if="!anidada" class="segmentos td-densidad" role="group" :aria-label="t('Densidad')">
+        <button v-for="[d, txt] in DENSIDADES" :key="d" type="button" class="segmento" :aria-pressed="conf.densidad === d" :title="txt" @click="cambiarDensidad(d)">
+          <span class="td-icono-densidad" :class="d" aria-hidden="true"></span><span class="oculto-visual">{{ txt }}</span>
         </button>
       </div>
       <div class="sel-columnas" @keydown.esc="menuColumnas = false">
         <button type="button" class="btn btn-fantasma" :class="{ 'btn-chico': anidada }" :aria-expanded="menuColumnas" aria-haspopup="true" @click="menuColumnas = !menuColumnas">
-          <Icono nombre="columnas" :tam="16" />{{ t('Columns') }}<span v-if="ocultas" class="cuenta">{{ listaColumnas.length - ocultas }}/{{ listaColumnas.length }}</span>
+          <Icono nombre="columnas" :tam="16" />{{ t('Columnas') }}<span v-if="ocultas" class="cuenta">{{ listaColumnas.length - ocultas }}/{{ listaColumnas.length }}</span>
         </button>
-        <div v-if="menuColumnas" v-flotante="'fin'" class="sel-columnas-menu td-menu" role="dialog" :aria-label="t('Columns')">
-          <p class="sel-columnas-ayuda">{{ t('Show, hide and order the columns. Drag the edge of a header to make it wider.') }}</p>
+        <div v-if="menuColumnas" v-flotante="'fin'" class="sel-columnas-menu td-menu" role="dialog" :aria-label="t('Columnas')">
+          <p class="sel-columnas-ayuda">{{ t('Muestre, oculte y ordene las columnas. Arrastre el borde de un encabezado para ensancharlo.') }}</p>
           <ul>
             <li v-for="(c, i) in listaColumnas" :key="c.clave" class="sel-columnas-op">
-              <label class="check"><input type="checkbox" :checked="c.visible" :disabled="c.fija" @change="alternarColumna(c.clave)" />{{ tx(c.texto) }}</label>
+              <label class="check"><input type="checkbox" :checked="c.visible" :disabled="c.fija" @change="alternarColumna(c.clave)" />{{ c.texto }}</label>
               <span class="td-mover">
-                <button type="button" class="btn-icono" :disabled="i === 0" :aria-label="t('Move {0} up', [tx(c.texto)])" @click="moverColumna(c.clave, -1)"><Icono nombre="arriba" :tam="14" /></button>
-                <button type="button" class="btn-icono" :disabled="i === listaColumnas.length - 1" :aria-label="t('Move {0} down', [tx(c.texto)])" @click="moverColumna(c.clave, 1)"><Icono nombre="abajo" :tam="14" /></button>
+                <button type="button" class="btn-icono" :disabled="i === 0" :aria-label="t('Subir {0}', [c.texto])" @click="moverColumna(c.clave, -1)"><Icono nombre="arriba" :tam="14" /></button>
+                <button type="button" class="btn-icono" :disabled="i === listaColumnas.length - 1" :aria-label="t('Bajar {0}', [c.texto])" @click="moverColumna(c.clave, 1)"><Icono nombre="abajo" :tam="14" /></button>
               </span>
             </li>
           </ul>
-          <button type="button" class="btn btn-chico btn-fantasma" @click="restaurar">{{ t('Back to the initial view') }}</button>
+          <button type="button" class="btn btn-chico btn-fantasma" @click="restaurar">{{ t('Volver a la vista inicial') }}</button>
         </div>
       </div>
       </template>
     </div>
     <div v-if="masFiltros && slots['mas-filtros']" class="filtros filtros-avanzados"><slot name="mas-filtros" /></div>
     <div v-if="nFiltros" class="chips">
-      <span v-for="x in chipsExternos" :key="`e-${x.clave}`" class="chip">{{ tx(x.texto) }}
-        <button type="button" :aria-label="t('Remove {0}', [tx(x.texto)])" @click="emit('quitar-externo', x.clave)"><Icono nombre="cerrar" :tam="13" /></button></span>
+      <span v-for="x in chipsExternos" :key="`e-${x.clave}`" class="chip">{{ x.texto }}
+        <button type="button" :aria-label="t('Quitar {0}', [x.texto])" @click="emit('quitar-externo', x.clave)"><Icono nombre="cerrar" :tam="13" /></button></span>
       <span v-for="a in activos" :key="a[0]" class="chip">{{ textoChip(a) }}
-        <button type="button" :aria-label="t('Remove {0}', [textoChip(a)])" @click="quitarFiltro(a[0])"><Icono nombre="cerrar" :tam="13" /></button></span>
-      <button type="button" class="btn btn-fantasma btn-chico" @click="limpiar">{{ t('Clear filters') }}</button>
+        <button type="button" :aria-label="t('Quitar {0}', [textoChip(a)])" @click="quitarFiltro(a[0])"><Icono nombre="cerrar" :tam="13" /></button></span>
+      <button type="button" class="btn btn-fantasma btn-chico" @click="limpiar">{{ t('Limpiar filtros') }}</button>
     </div>
 
     <div ref="marco" class="tabla-marco" :class="{ 'tabla-fija': conPaginacion }">
-      <table class="tabla" :aria-label="tx(etiqueta) || undefined" :aria-busy="cargando">
+      <table v-tarjetas class="tabla" :aria-label="etiqueta || undefined" :aria-busy="cargando">
         <thead>
           <tr>
             <th v-if="seleccionable" class="chk">
-              <input type="checkbox" :aria-label="t('Select all on this page')" :checked="todasElegidas" :disabled="!seleccionables.length" @change="alternarTodas" />
+              <input type="checkbox" :aria-label="t('Elegir todas las de esta página')" :checked="todasElegidas" :disabled="!seleccionables.length" @change="alternarTodas" />
             </th>
-            <th v-if="conDetalle" class="td-exp"><span class="oculto-visual">{{ t('Detail') }}</span></th>
-            <th v-for="c in enPantalla" :key="c.clave" :class="{ num: c.num, 'td-filtrada': filtrada(c) }" :style="estiloColumna(c)" :title="c.corto ? tx(c.texto) : undefined"
+            <th v-if="conDetalle" class="td-exp" data-label=""><span class="oculto-visual">{{ t('Detalle') }}</span></th>
+            <th v-for="c in enPantalla" :key="c.clave" :class="{ num: c.num, 'td-filtrada': filtrada(c) }" :style="estiloColumna(c)" :title="c.corto ? c.texto : undefined"
                 :aria-sort="dirOrden(c) === 'asc' ? 'ascending' : dirOrden(c) === 'desc' ? 'descending' : undefined">
               <div class="td-th">
                 <button v-if="c.ordenable !== false" type="button" class="orden-btn" :class="{ activo: dirOrden(c) }" @click="ordenar(c)">
-                  {{ tx(c.corto || c.texto) }}<Icono :nombre="dirOrden(c) === 'asc' ? 'arriba' : dirOrden(c) === 'desc' ? 'abajo' : 'arribaabajo'" :tam="12" class="td-flecha" :class="{ activa: dirOrden(c) }" />
+                  {{ c.corto || c.texto }}<Icono :nombre="dirOrden(c) === 'asc' ? 'arriba' : dirOrden(c) === 'desc' ? 'abajo' : 'arribaabajo'" :tam="12" class="td-flecha" :class="{ activa: dirOrden(c) }" />
                 </button>
-                <span v-else>{{ tx(c.corto || c.texto) }}</span>
+                <span v-else>{{ c.corto || c.texto }}</span>
                 <button v-if="filtrable(c)" type="button" class="btn-icono td-filtrar" :class="{ activo: filtrada(c) }" :aria-expanded="abierto?.c.clave === c.clave"
-                        :aria-label="t('Filter by {0}', [tx(c.texto)])" :title="t('Filter by {0}', [tx(c.texto)])" @click="abrirFiltro(c, $event)">
+                        :aria-label="t('Filtrar por {0}', [c.texto])" :title="t('Filtrar por {0}', [c.texto])" @click="abrirFiltro(c, $event)">
                   <Icono nombre="filtro" :tam="13" /><span v-if="filtrada(c)" class="td-n">{{ filtros[c.clave].length }}</span>
                 </button>
               </div>
-              <span class="td-redim" role="separator" aria-orientation="vertical" tabindex="0" :aria-label="t('Width of {0}', [tx(c.texto)])"
+              <span class="td-redim" role="separator" aria-orientation="vertical" tabindex="0" :aria-label="t('Ancho de {0}', [c.texto])"
                     @mousedown="empezarAncho($event, c)" @keydown.left.prevent="anchoTeclado($event, c)" @keydown.right.prevent="anchoTeclado($event, c)"></span>
             </th>
-            <th class="td-acciones"><span class="oculto-visual">{{ t('Actions') }}</span></th>
+            <th class="td-acciones" data-label=""><span class="oculto-visual">{{ t('Acciones') }}</span></th>
           </tr>
         </thead>
         <tbody>
@@ -516,15 +516,15 @@ const hayPie = computed(() => Object.keys(slots).some((k) => k.startsWith('pie-'
             <tr :class="[{ clicable: filaClicable, seleccionada: seleccionable && elegidas.has(clave(fila)), 'fila-activa': filaActiva !== null && filaActiva === clave(fila) }, claseFila?.(fila)]"
                 @click="filaClicable && emit('fila', fila)">
               <td v-if="seleccionable" class="chk" @click.stop>
-                <input type="checkbox" :aria-label="t('Select row')" :checked="elegidas.has(clave(fila))"
+                <input type="checkbox" :aria-label="t('Elegir fila')" :checked="elegidas.has(clave(fila))"
                        :disabled="!!puedeSeleccionar && !puedeSeleccionar(fila)" @change="alternarSeleccion(fila)" />
               </td>
               <td v-if="conDetalle" class="td-exp">
-                <button type="button" class="btn-icono" :aria-expanded="abiertas.has(clave(fila))" :aria-label="t('Show detail')" @click.stop="alternar(fila)">
+                <button type="button" class="btn-icono" :aria-expanded="abiertas.has(clave(fila))" :aria-label="t('Ver detalle')" @click.stop="alternar(fila)">
                   <Icono :nombre="abiertas.has(clave(fila)) ? 'abajo' : 'derecha'" :tam="16" /></button>
               </td>
               <td v-for="c in enPantalla" :key="c.clave" :class="{ num: c.num }" :style="estiloColumna(c)">
-                <slot :name="`celda-${c.clave}`" :fila="fila" :valor="fila[c.clave]">{{ tx(fila[c.clave] ?? '—') }}</slot>
+                <slot :name="`celda-${c.clave}`" :fila="fila" :valor="fila[c.clave]">{{ fila[c.clave] ?? '—' }}</slot>
               </td>
               <td class="td-acciones" @click.stop><slot name="acciones" :fila="fila" /></td>
             </tr>
@@ -533,8 +533,8 @@ const hayPie = computed(() => Object.keys(slots).some((k) => k.startsWith('pie-'
                 <DetalleAnidado>
                   <dl v-if="ocultasPorEspacio.length" class="td-datos">
                     <template v-for="c in ocultasPorEspacio" :key="c.clave">
-                      <dt>{{ tx(c.texto) }}</dt>
-                      <dd><slot :name="`celda-${c.clave}`" :fila="fila" :valor="fila[c.clave]">{{ tx(fila[c.clave] ?? '—') }}</slot></dd>
+                      <dt>{{ c.texto }}</dt>
+                      <dd><slot :name="`celda-${c.clave}`" :fila="fila" :valor="fila[c.clave]">{{ fila[c.clave] ?? '—' }}</slot></dd>
                     </template>
                   </dl>
                   <slot name="detalle" :fila="fila" />
@@ -546,10 +546,10 @@ const hayPie = computed(() => Object.keys(slots).some((k) => k.startsWith('pie-'
           <tr v-if="!cargando && !filasPagina.length">
             <td :colspan="nColumnas" class="vacio">
               <template v-if="nFiltros">
-                {{ t('No records match these filters.') }}
-                <div><button type="button" class="btn btn-chico mt-chico" @click="limpiar">{{ t('Clear filters') }}</button></div>
+                {{ t('Ningún registro coincide con estos filtros.') }}
+                <div><button type="button" class="btn btn-chico mt-chico" @click="limpiar">{{ t('Limpiar filtros') }}</button></div>
               </template>
-              <slot v-else name="vacio">{{ t('No records yet.') }}</slot>
+              <slot v-else name="vacio">{{ t('Todavía no hay registros.') }}</slot>
             </td>
           </tr>
         </tbody>
@@ -603,7 +603,7 @@ th { position: relative; }
 .td-datos { display: grid; grid-template-columns: minmax(110px, auto) 1fr; gap: 4px 14px; margin: 0 0 8px; font-size: var(--t-sm); }
 .td-datos dt { color: var(--tinta-3); }
 .td-datos dd { margin: 0; min-width: 0; }
-/* Densidad: la definen las variables --td-* de styles.css (Tablas) */
+/* Densidad: la definen las variables --td-* de estilos/tablas.css */
 @media (max-width: 720px) {
   .td-densidad { display: none; }
 }

@@ -3,9 +3,10 @@
 // (el patrón de mantenimiento de facturacion). Elegir una fila la carga en el
 // formulario; «Nuevo» lo deja en blanco. Nada se abre en ventanas.
 import { computed, onMounted, reactive, ref } from 'vue'
-import { api, CONFIG } from '@/nucleo/api.js'
+import { api } from '@/nucleo/api.js'
+import { CONFIG } from '@/modulos/productos/compartido/api.js'
 import { avisar, avisarError } from '@/nucleo/avisos.js'
-import { catalogo as leerCatalogo, invalidarCatalogo } from '@/nucleo/catalogos.js'
+import { catalogo as leerCatalogo, invalidarCatalogo } from '@/modulos/productos/compartido/catalogos.js'
 import BotonConfirmar from '@/componentes/BotonConfirmar.vue'
 import Icono from '@/componentes/Icono.vue'
 import TablaDatos from '@/componentes/TablaDatos.vue'

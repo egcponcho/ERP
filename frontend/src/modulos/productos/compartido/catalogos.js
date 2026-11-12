@@ -1,7 +1,8 @@
 // Catálogos de configuración que usan varias pantallas (unidades, estados, tipos…),
 // leídos una vez y vueltos a leer cuando se modifican.
 import { reactive } from 'vue'
-import { api, CONFIG } from './api.js'
+import { api } from '@/nucleo/api.js'
+import { CONFIG } from './api.js'
 
 const cache = reactive({})
 const pendientes = {}

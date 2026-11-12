@@ -1,6 +1,6 @@
 <script setup>
 // Paso: en qué categorías aparece el producto (una por taxonomía, o varias si la taxonomía lo permite).
-import SelectorCategorias from '@/componentes/SelectorCategorias.vue'
+import SelectorCategorias from '@/modulos/productos/compartido/SelectorCategorias.vue'
 import { b } from './borrador.js'
 
 defineProps({ errores: { type: Array, default: () => [] } })

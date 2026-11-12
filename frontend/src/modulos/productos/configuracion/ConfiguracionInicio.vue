@@ -3,7 +3,7 @@
 // registros tiene, agrupados en el orden en que conviene configurarlos.
 import { onMounted, reactive } from 'vue'
 import { avisarError } from '@/nucleo/avisos.js'
-import { catalogo } from '@/nucleo/catalogos.js'
+import { catalogo } from '@/modulos/productos/compartido/catalogos.js'
 import Icono from '@/componentes/Icono.vue'
 import { APARTADOS } from './catalogos.js'
 

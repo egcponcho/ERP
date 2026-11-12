@@ -1,5 +1,5 @@
 <script setup>
-import { t, tx } from '@/nucleo/texto.js'
+import { t } from '@/nucleo/texto.js'
 import { computed, nextTick, ref, watch } from 'vue'
 import Icono from './Icono.vue'
 
@@ -14,7 +14,7 @@ const props = defineProps({
   actual: { type: Number, default: 0 },
   ocupado: Boolean,
   guardado: { type: String, default: '' }, // estado del guardado («Saved at 10:42», «Saving…»)
-  textoFinal: { type: String, default: t('Finish') },
+  textoFinal: { type: String, default: t('Terminar') },
   conBorrador: { type: Boolean, default: true },
 })
 const emit = defineEmits(['ir', 'anterior', 'siguiente', 'guardar', 'finalizar', 'cerrar'])
@@ -28,19 +28,19 @@ const marca = (p, i) => (i === props.actual ? 'actual' : p.errores ? 'error' : p
 </script>
 
 <template>
-  <section class="asistente" :aria-label="tx(documento || paso.titulo)">
+  <section class="asistente" :aria-label="documento || paso.titulo">
     <header class="as-cabeza">
       <div class="as-titulos">
-        <span class="eyebrow">{{ t('Step {0} of {1}', [actual + 1, pasos.length]) }}<template v-if="documento"> · {{ tx(documento) }}</template></span>
-        <h1 ref="titulo" tabindex="-1">{{ tx(paso.titulo) }}</h1>
+        <span class="eyebrow">{{ t('Paso {0} de {1}', [actual + 1, pasos.length]) }}<template v-if="documento"> · {{ documento }}</template></span>
+        <h1 ref="titulo" tabindex="-1">{{ paso.titulo }}</h1>
       </div>
-      <span class="as-guardado" role="status" aria-live="polite">{{ tx(guardado) }}</span>
-      <button type="button" class="btn btn-fantasma as-cerrar" :title="t('Close the assistant')" @click="emit('cerrar')"><Icono nombre="cerrar" :tam="18" />{{ t('Exit') }}</button>
+      <span class="as-guardado" role="status" aria-live="polite">{{ guardado }}</span>
+      <button type="button" class="btn btn-fantasma as-cerrar" :title="t('Salir del asistente (el borrador queda guardado)')" @click="emit('cerrar')"><Icono nombre="cerrar" :tam="18" />{{ t('Salir') }}</button>
     </header>
-    <div class="as-barra" role="progressbar" :aria-label="t('Progress')" aria-valuemin="1" :aria-valuemax="pasos.length" :aria-valuenow="actual + 1">
+    <div class="as-barra" role="progressbar" :aria-label="t('Avance')" aria-valuemin="1" :aria-valuemax="pasos.length" :aria-valuenow="actual + 1">
       <div :style="{ width: `${porcentaje}%` }"></div>
     </div>
-    <nav class="as-pasos" :aria-label="t('Steps')">
+    <nav class="as-pasos" :aria-label="t('Pasos')">
       <ol>
         <li v-for="(p, i) in pasos" :key="p.clave">
           <button type="button" class="as-paso" :class="marca(p, i)" :aria-current="i === actual ? 'step' : undefined"
@@ -48,21 +48,21 @@ const marca = (p, i) => (i === props.actual ? 'actual' : p.errores ? 'error' : p
             <span class="as-marca">
               <Icono v-if="marca(p, i) === 'completo'" nombre="check" :tam="13" />
               <Icono v-else-if="marca(p, i) === 'error'" nombre="alerta" :tam="13" />
-              <template v-else>{{ tx(i + 1) }}</template>
+              <template v-else>{{ i + 1 }}</template>
             </span>
-            <span class="as-paso-titulo">{{ tx(p.titulo) }}</span>
-            <span v-if="marca(p, i) === 'error'" class="oculto-visual">{{ t('(needs attention)') }}</span>
+            <span class="as-paso-titulo">{{ p.titulo }}</span>
+            <span v-if="marca(p, i) === 'error'" class="oculto-visual">{{ t('(necesita atención)') }}</span>
           </button>
         </li>
       </ol>
     </nav>
     <div class="as-cuerpo"><slot /></div>
     <footer class="as-pie">
-      <button v-if="actual > 0" type="button" class="btn" :disabled="ocupado" @click="emit('anterior')"><Icono nombre="atras" :tam="16" />{{ t('Back') }}</button>
+      <button v-if="actual > 0" type="button" class="btn" :disabled="ocupado" @click="emit('anterior')"><Icono nombre="atras" :tam="16" />{{ t('Atrás') }}</button>
       <span class="as-espacio"></span>
-      <button v-if="conBorrador" type="button" class="btn btn-fantasma" :disabled="ocupado" @click="emit('guardar')">{{ t('Save draft') }}</button>
-      <button v-if="!ultimo" type="button" class="btn btn-primario" :disabled="ocupado" @click="emit('siguiente')">{{ t('Next') }}<Icono nombre="derecha" :tam="16" /></button>
-      <button v-else type="button" class="btn btn-primario" :disabled="ocupado" @click="emit('finalizar')"><Icono nombre="check" :tam="16" />{{ tx(textoFinal) }}</button>
+      <button v-if="conBorrador" type="button" class="btn btn-fantasma" :disabled="ocupado" @click="emit('guardar')">{{ t('Guardar borrador') }}</button>
+      <button v-if="!ultimo" type="button" class="btn btn-primario" :disabled="ocupado" @click="emit('siguiente')">{{ t('Siguiente') }}<Icono nombre="derecha" :tam="16" /></button>
+      <button v-else type="button" class="btn btn-primario" :disabled="ocupado" @click="emit('finalizar')"><Icono nombre="check" :tam="16" />{{ textoFinal }}</button>
     </footer>
   </section>
 </template>

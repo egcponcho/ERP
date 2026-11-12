@@ -1,5 +1,4 @@
 <script setup>
-import { tx } from '@/nucleo/texto.js'
 import { ref, watch } from 'vue'
 
 // Guarda al salir del campo o con Enter; Escape deshace.
@@ -52,8 +51,8 @@ function tecla(e) {
     :type="props.tipo"
     :min="props.min"
     :step="props.paso"
-    :aria-label="tx(props.etiqueta)"
-    :placeholder="tx(props.vaciaTexto)"
+    :aria-label="props.etiqueta"
+    :placeholder="props.vaciaTexto"
     :style="props.ancho ? { width: props.ancho } : null"
     @change="confirmar"
     @keydown="tecla"
