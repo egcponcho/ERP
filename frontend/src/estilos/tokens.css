@@ -1,0 +1,143 @@
+/*
+  Tokens de diseño (design-system/ERP.md). Ningún componente usa colores ni
+  medidas sueltas: todo sale de aquí, en claro y en oscuro.
+
+  Lenguaje visual inspirado en iOS / iPadOS:
+  - Fondo agrupado gris (#F2F2F7) con tarjetas blancas sin borde; en oscuro,
+    negro con tarjetas #1C1C1E. Separadores finos en lugar de cajas.
+  - Un solo color de acción (azul) y colores de estado del sistema, en sus
+    variantes accesibles (contraste AA sobre su fondo).
+  - Tipografía del sistema (SF Pro en Apple; Inter en el resto), títulos
+    grandes y negritas en lugar de mayúsculas.
+  - Esquinas continuas y generosas, controles rellenos (no contorneados),
+    controles segmentados e interruptores.
+  - Movimiento con resorte, corto, y nada si el sistema pide movimiento reducido.
+*/
+:root {
+  /* Texto (label, secondaryLabel, tertiaryLabel en opaco y con AA) */
+  --tinta: #000000;
+  --tinta-2: #3c3c43;
+  --tinta-3: #6c6c70;
+  /* Fondos agrupados */
+  --papel: #f2f2f7;
+  --superficie: #ffffff;
+  --superficie-2: #f2f2f7;
+  --superficie-3: #e9e9ef;
+  /* Rellenos de controles (systemFill) y separadores */
+  --relleno: rgba(118, 118, 128, 0.12);
+  --relleno-2: rgba(118, 118, 128, 0.2);
+  --linea: #d8d8dc;
+  --linea-suave: #e5e5ea;
+  --borde-hover: #c7c7cc;
+  --fila-hover: #f5f5f8;
+  /* Acción: azul de Apple para la web (texto blanco encima con AA) */
+  --acento: #0071e3;
+  --acento-hover: #0062c4;
+  --acento-claro: rgba(0, 113, 227, 0.1);
+  --acento-medio: rgba(0, 113, 227, 0.32);
+  --acento-texto: #0062c4;
+  --sobre-acento: #ffffff;
+  --azul: var(--acento);
+  --azul-oscuro: var(--acento-texto);
+  --azul-claro: var(--acento-claro);
+  /* Estados (systemGreen, systemOrange, systemRed en su versión accesible) */
+  --ok: #1f7a35;
+  --ok-fondo: rgba(52, 199, 89, 0.14);
+  --ok-borde: rgba(52, 199, 89, 0.35);
+  --aviso: #b25000;
+  --aviso-fondo: rgba(255, 149, 0, 0.15);
+  --aviso-borde: rgba(255, 149, 0, 0.4);
+  --error: #d70015;
+  --error-fondo: rgba(255, 59, 48, 0.12);
+  --info: #0062c4;
+  --info-fondo: rgba(0, 113, 227, 0.1);
+  --info-texto: #00468c;
+  --morado: #8944ab;
+  --sobre-estado: #ffffff;
+  /* Materiales translúcidos (barras con desenfoque) */
+  --material: rgba(249, 249, 251, 0.78);
+  --material-borde: rgba(0, 0, 0, 0.12);
+  --barra-sup: var(--material);
+  --velo: rgba(0, 0, 0, 0.32);
+  /* Flotantes oscuros (barra de selección, avisos) */
+  --flotante: rgba(30, 30, 32, 0.92);
+  --flotante-2: #aeaeb2;
+  --flotante-borde: rgba(255, 255, 255, 0.16);
+  --toast-error: rgba(140, 20, 30, 0.94);
+  --foco: rgba(0, 113, 227, 0.35);
+  /* Gráficas */
+  --barra-dato: #0071e3;
+  --barra-fondo: rgba(118, 118, 128, 0.12);
+  /* Sombras suaves: casi todo se separa por color, no por sombra */
+  --sombra: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --sombra-media: 0 6px 20px -6px rgba(0, 0, 0, 0.12), 0 2px 6px -2px rgba(0, 0, 0, 0.06);
+  --sombra-flotante: 0 24px 60px -16px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.08);
+  --sombra-segmento: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04);
+  /* Barra lateral (como la de iPadOS) */
+  --lateral: #f2f2f7;
+  --lateral-texto: var(--tinta);
+  --lateral-icono: var(--acento);
+  /* Forma: esquinas continuas */
+  --radio-chico: 8px;
+  --radio: 10px;
+  --radio-panel: 16px;
+  --radio-grande: 22px;
+  /* Espaciado: múltiplos de 4 px */
+  --e-1: 4px; --e-2: 8px; --e-3: 12px; --e-4: 16px; --e-5: 20px; --e-6: 24px; --e-8: 32px;
+  /* Tipografía: escala de iOS ajustada a escritorio (base 15 px) */
+  --t-xs: 0.75rem; --t-sm: 0.875rem; --t-md: 1rem; --t-lg: 1.15rem; --t-xl: 1.4rem; --t-2xl: 2.125rem;
+  --fuente: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter Variable', 'Inter', 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  --fuente-titulo: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter Variable', 'Inter', 'Segoe UI Variable', system-ui, sans-serif;
+  --mono: ui-monospace, 'SF Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+  /* Movimiento: resorte de iOS */
+  --resorte: cubic-bezier(0.32, 0.72, 0, 1);
+  --rapido: 160ms; --normal: 240ms; --lento: 420ms;
+  /* Alturas del marco */
+  --alto-cabecera: 52px;
+  --alto-pestanas: 56px;
+  color-scheme: light;
+}
+
+/* Oscuro: valores propios (no es el claro invertido) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --tinta: #ffffff; --tinta-2: #ebebf5; --tinta-3: #a1a1a8;
+    --papel: #000000; --superficie: #1c1c1e; --superficie-2: #2c2c2e; --superficie-3: #3a3a3c;
+    --relleno: rgba(118, 118, 128, 0.24); --relleno-2: rgba(118, 118, 128, 0.36);
+    --linea: #38383a; --linea-suave: #2c2c2e; --borde-hover: #48484a; --fila-hover: #242426;
+    --acento: #0071e3; --acento-hover: #1a7fe8; --acento-claro: rgba(10, 132, 255, 0.18); --acento-medio: rgba(10, 132, 255, 0.45);
+    --acento-texto: #4da3ff; --sobre-acento: #ffffff;
+    --ok: #30d158; --ok-fondo: rgba(48, 209, 88, 0.16); --ok-borde: rgba(48, 209, 88, 0.4);
+    --aviso: #ff9f0a; --aviso-fondo: rgba(255, 159, 10, 0.16); --aviso-borde: rgba(255, 159, 10, 0.4);
+    --error: #ff6961; --error-fondo: rgba(255, 69, 58, 0.16);
+    --info: #4da3ff; --info-fondo: rgba(10, 132, 255, 0.16); --info-texto: #8ec5ff; --morado: #bf5af2;
+    --sobre-estado: #000000;
+    --material: rgba(28, 28, 30, 0.76); --material-borde: rgba(255, 255, 255, 0.1); --velo: rgba(0, 0, 0, 0.5);
+    --flotante: rgba(44, 44, 46, 0.94); --flotante-borde: rgba(255, 255, 255, 0.14); --toast-error: rgba(120, 20, 26, 0.95);
+    --foco: rgba(10, 132, 255, 0.5); --barra-dato: #0a84ff; --barra-fondo: rgba(118, 118, 128, 0.24);
+    --sombra: none; --sombra-media: 0 8px 24px rgba(0, 0, 0, 0.5); --sombra-flotante: 0 24px 60px rgba(0, 0, 0, 0.6);
+    --sombra-segmento: 0 3px 8px rgba(0, 0, 0, 0.3);
+    --lateral: #000000;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --tinta: #ffffff; --tinta-2: #ebebf5; --tinta-3: #a1a1a8;
+  --papel: #000000; --superficie: #1c1c1e; --superficie-2: #2c2c2e; --superficie-3: #3a3a3c;
+  --relleno: rgba(118, 118, 128, 0.24); --relleno-2: rgba(118, 118, 128, 0.36);
+  --linea: #38383a; --linea-suave: #2c2c2e; --borde-hover: #48484a; --fila-hover: #242426;
+  --acento: #0071e3; --acento-hover: #1a7fe8; --acento-claro: rgba(10, 132, 255, 0.18); --acento-medio: rgba(10, 132, 255, 0.45);
+  --acento-texto: #4da3ff; --sobre-acento: #ffffff;
+  --ok: #30d158; --ok-fondo: rgba(48, 209, 88, 0.16); --ok-borde: rgba(48, 209, 88, 0.4);
+  --aviso: #ff9f0a; --aviso-fondo: rgba(255, 159, 10, 0.16); --aviso-borde: rgba(255, 159, 10, 0.4);
+  --error: #ff6961; --error-fondo: rgba(255, 69, 58, 0.16);
+  --info: #4da3ff; --info-fondo: rgba(10, 132, 255, 0.16); --info-texto: #8ec5ff; --morado: #bf5af2;
+  --sobre-estado: #000000;
+  --material: rgba(28, 28, 30, 0.76); --material-borde: rgba(255, 255, 255, 0.1); --velo: rgba(0, 0, 0, 0.5);
+  --flotante: rgba(44, 44, 46, 0.94); --flotante-borde: rgba(255, 255, 255, 0.14); --toast-error: rgba(120, 20, 26, 0.95);
+  --foco: rgba(10, 132, 255, 0.5); --barra-dato: #0a84ff; --barra-fondo: rgba(118, 118, 128, 0.24);
+  --sombra: none; --sombra-media: 0 8px 24px rgba(0, 0, 0, 0.5); --sombra-flotante: 0 24px 60px rgba(0, 0, 0, 0.6);
+  --sombra-segmento: 0 3px 8px rgba(0, 0, 0, 0.3);
+  --lateral: #000000;
+  color-scheme: dark;
+}

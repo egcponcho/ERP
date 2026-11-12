@@ -3,7 +3,7 @@
 // todas las combinaciones; en la vista previa se puede quitar las que no van.
 import { computed, reactive } from 'vue'
 import { b, claveCombinacion } from './borrador.js'
-import CampoAtributo from '@/componentes/CampoAtributo.vue'
+import CampoAtributo from '@/modulos/productos/compartido/CampoAtributo.vue'
 import Icono from '@/componentes/Icono.vue'
 import TablaDatos from '@/componentes/TablaDatos.vue'
 

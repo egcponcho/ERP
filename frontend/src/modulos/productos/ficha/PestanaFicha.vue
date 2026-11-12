@@ -4,11 +4,11 @@
 import { computed, ref } from 'vue'
 import { api } from '@/nucleo/api.js'
 import { avisar } from '@/nucleo/avisos.js'
-import { catalogo } from '@/nucleo/catalogos.js'
-import { valorTexto } from '@/nucleo/formato.js'
-import CampoAtributo from '@/componentes/CampoAtributo.vue'
+import { catalogo } from '@/modulos/productos/compartido/catalogos.js'
+import { valorTexto } from '@/modulos/productos/compartido/formato.js'
+import CampoAtributo from '@/modulos/productos/compartido/CampoAtributo.vue'
 import Icono from '@/componentes/Icono.vue'
-import SelectorCategorias from '@/componentes/SelectorCategorias.vue'
+import SelectorCategorias from '@/modulos/productos/compartido/SelectorCategorias.vue'
 
 const props = defineProps({ producto: { type: Object, required: true }, esquema: { type: Object, required: true }, unidades: { type: Array, required: true } })
 const emit = defineEmits(['actualizado', 'recargar'])

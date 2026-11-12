@@ -4,7 +4,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { api } from '@/nucleo/api.js'
 import { avisarError } from '@/nucleo/avisos.js'
-import { fecha, valorTexto } from '@/nucleo/formato.js'
+import { fecha, valorTexto } from '@/modulos/productos/compartido/formato.js'
 import Icono from '@/componentes/Icono.vue'
 import TablaDatos from '@/componentes/TablaDatos.vue'
 

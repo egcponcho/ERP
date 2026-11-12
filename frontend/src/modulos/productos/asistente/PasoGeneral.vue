@@ -1,7 +1,7 @@
 <script setup>
 // Paso 2: lo que tiene cualquier producto. El código se genera solo si el tipo tiene numeración.
 import { computed } from 'vue'
-import { heredado } from '@/nucleo/esquemaLocal.js'
+import { heredado } from '@/modulos/productos/compartido/esquemaLocal.js'
 import { b } from './borrador.js'
 
 const props = defineProps({ esquema: { type: Object, required: true },

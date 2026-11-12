@@ -2,7 +2,7 @@
 // Control de un atributo según su tipo de dato. Lo arma el esquema del tipo de
 // producto: ninguna pantalla conoce los atributos de un rubro.
 import { computed } from 'vue'
-import Icono from './Icono.vue'
+import Icono from '@/componentes/Icono.vue'
 import SelectorProducto from './SelectorProducto.vue'
 
 const props = defineProps({

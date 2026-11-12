@@ -2,9 +2,10 @@
 // Crear un tipo de producto sin salir del asistente: nombre, numeración y qué
 // características tiene (las que ya existen o nuevas, creadas aquí mismo).
 import { computed, reactive, ref } from 'vue'
-import { api, CONFIG } from '@/nucleo/api.js'
+import { api } from '@/nucleo/api.js'
+import { CONFIG } from '@/modulos/productos/compartido/api.js'
 import { avisar } from '@/nucleo/avisos.js'
-import { TIPOS_DATO } from '@/nucleo/formato.js'
+import { TIPOS_DATO } from '@/modulos/productos/compartido/formato.js'
 import Icono from '@/componentes/Icono.vue'
 import PanelEnLinea from '@/componentes/PanelEnLinea.vue'
 import TablaDatos from '@/componentes/TablaDatos.vue'

@@ -1,0 +1,9 @@
+/* Hoja de estilos de la aplicación, en orden: tokens → base → marco → controles → contenido → tablas → adaptable.
+   Guía visual completa: design-system/ERP.md */
+@import './tokens.css';
+@import './base.css';
+@import './marco.css';
+@import './controles.css';
+@import './contenido.css';
+@import './tablas.css';
+@import './adaptable.css';

@@ -3,8 +3,9 @@
 // tipo de dato y, según el tipo, sus opciones o su unidad. Las reglas finas
 // (mínimos, formatos) se ajustan después en Configuración → Características.
 import { computed, reactive, ref } from 'vue'
-import { api, CONFIG } from '@/nucleo/api.js'
-import { TIPOS_DATO } from '@/nucleo/formato.js'
+import { api } from '@/nucleo/api.js'
+import { CONFIG } from '@/modulos/productos/compartido/api.js'
+import { TIPOS_DATO } from '@/modulos/productos/compartido/formato.js'
 import Icono from '@/componentes/Icono.vue'
 
 defineProps({ datos: { type: Object, required: true } })

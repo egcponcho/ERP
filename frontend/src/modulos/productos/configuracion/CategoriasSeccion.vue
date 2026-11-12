@@ -2,9 +2,10 @@
 // Categorías: se elige la taxonomía (pastillas) y su árbol se ve en la tabla común
 // con sangría; cada fila se abre para editarla y desde ella se agrega una subcategoría.
 import { computed, onMounted, reactive, ref } from 'vue'
-import { api, CONFIG } from '@/nucleo/api.js'
+import { api } from '@/nucleo/api.js'
+import { CONFIG } from '@/modulos/productos/compartido/api.js'
 import { avisar, avisarError } from '@/nucleo/avisos.js'
-import { catalogo, invalidarCatalogo } from '@/nucleo/catalogos.js'
+import { catalogo, invalidarCatalogo } from '@/modulos/productos/compartido/catalogos.js'
 import BotonConfirmar from '@/componentes/BotonConfirmar.vue'
 import Icono from '@/componentes/Icono.vue'
 import PanelEnLinea from '@/componentes/PanelEnLinea.vue'

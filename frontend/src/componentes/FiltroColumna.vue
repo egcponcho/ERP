@@ -1,5 +1,5 @@
 <script setup>
-import { t, tx } from '@/nucleo/texto.js'
+import { t } from '@/nucleo/texto.js'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { abrirCapa, cerrarCapa, esLaDeArriba } from '@/nucleo/capas.js'
 import Icono from './Icono.vue'
@@ -40,7 +40,7 @@ async function pedir() {
     const r = await props.cargar(q.value.trim())
     if (n !== turno) return
     const lista = (r || []).map((x) => ({ valor: x.valor === null || x.valor === undefined || x.valor === '' ? VACIO : String(x.valor),
-      texto: x.valor === null || x.valor === undefined || x.valor === '' ? t('(Empty)') : String(x.texto ?? x.valor), n: x.n }))
+      texto: x.valor === null || x.valor === undefined || x.valor === '' ? t('(Vacío)') : String(x.texto ?? x.valor), n: x.n }))
     truncado.value = lista.length > MAXIMO
     opciones.value = lista.slice(0, MAXIMO)
     for (const o of opciones.value) conocidos.value.set(o.valor, o.texto)
@@ -119,31 +119,31 @@ const ocultosMarcados = computed(() => [...marcados.value].filter((v) => !opcion
 
 <template>
   <Teleport to="body">
-    <div ref="raiz" class="fc" role="dialog" :aria-label="t('Filter by {0}', [tx(titulo)])"
+    <div ref="raiz" class="fc" role="dialog" :aria-label="t('Filtrar por {0}', [titulo])"
          :style="{ top: `${pos.top}px`, left: `${pos.left}px`, width: `${pos.ancho}px` }">
-      <div class="fc-titulo">{{ t('Filter by {0}', [tx(titulo)]) }}</div>
+      <div class="fc-titulo">{{ t('Filtrar por {0}', [titulo]) }}</div>
       <label class="buscador fc-buscar">
         <Icono nombre="buscar" :tam="15" />
-        <input ref="buscador" v-model="q" class="entrada" type="search" :placeholder="t('Search values…')" :aria-label="t('Search values')"
+        <input ref="buscador" v-model="q" class="entrada" type="search" :placeholder="t('Buscar valores…')" :aria-label="t('Buscar valores')"
                @input="buscar" @keydown.enter.prevent="aplicar" />
       </label>
-      <div class="fc-lista" role="group" :aria-label="t('Values')" :aria-busy="cargando">
+      <div class="fc-lista" role="group" :aria-label="t('Valores')" :aria-busy="cargando">
         <label v-if="opciones.length > 1" class="fc-op fc-todos">
           <input type="checkbox" :checked="todos" @change="alternarTodos" />
-          <span>{{ q ? t('(Select all results)') : t('(Select all)') }}</span>
+          <span>{{ q ? t('(Elegir todos los resultados)') : t('(Elegir todos)') }}</span>
         </label>
         <label v-for="o in opciones" :key="o.valor" class="fc-op">
           <input type="checkbox" :checked="marcados.has(o.valor)" @change="alternar(o.valor)" />
-          <span class="fc-texto" :class="{ apagado: o.valor === VACIO }">{{ tx(o.texto) }}</span>
-          <span v-if="o.n !== undefined && o.n !== null" class="fc-n">{{ tx(o.n) }}</span>
+          <span class="fc-texto" :class="{ apagado: o.valor === VACIO }">{{ o.texto }}</span>
+          <span v-if="o.n !== undefined && o.n !== null" class="fc-n">{{ o.n }}</span>
         </label>
-        <p v-if="!cargando && !opciones.length" class="ayuda fc-nada">{{ t('No values match.') }}</p>
-        <p v-if="truncado" class="ayuda fc-nada">{{ t('Showing the first {0}; type to find the rest.', [MAXIMO]) }}</p>
+        <p v-if="!cargando && !opciones.length" class="ayuda fc-nada">{{ t('Ningún valor coincide.') }}</p>
+        <p v-if="truncado" class="ayuda fc-nada">{{ t('Se muestran los primeros {0}; escriba para encontrar el resto.', [MAXIMO]) }}</p>
       </div>
-      <p v-if="ocultosMarcados" class="ayuda fc-nota">{{ t('{0} more selected outside this search.', [ocultosMarcados]) }}</p>
+      <p v-if="ocultosMarcados" class="ayuda fc-nota">{{ t('{0} elegidos más fuera de esta búsqueda.', [ocultosMarcados]) }}</p>
       <div class="fc-pie">
-        <button type="button" class="btn btn-fantasma btn-chico" :disabled="!elegidos.length && !marcados.size" @click="limpiar">{{ t('Clear') }}</button>
-        <button type="button" class="btn btn-primario btn-chico" @click="aplicar">{{ t('Apply') }}</button>
+        <button type="button" class="btn btn-fantasma btn-chico" :disabled="!elegidos.length && !marcados.size" @click="limpiar">{{ t('Quitar') }}</button>
+        <button type="button" class="btn btn-primario btn-chico" @click="aplicar">{{ t('Aplicar') }}</button>
       </div>
     </div>
   </Teleport>
@@ -153,7 +153,7 @@ const ocultosMarcados = computed(() => [...marcados.value].filter((v) => !opcion
 .fc { position: fixed; z-index: 60; display: flex; flex-direction: column; gap: 8px; padding: 10px; max-height: min(460px, calc(100vh - 24px));
   background: var(--superficie); border: 1px solid var(--linea); border-radius: var(--radio-panel); box-shadow: var(--sombra-flotante);
   font-size: 0.9rem; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--tinta); }
-.fc-titulo { font-size: 0.78rem; font-weight: 650; color: var(--tinta-3); text-transform: uppercase; letter-spacing: 0.04em; }
+.fc-titulo { font-size: 0.86rem; font-weight: 600; color: var(--tinta-3); }
 .fc-buscar, .fc-buscar input { width: 100%; min-width: 0 !important; }
 .fc-lista { overflow: auto; min-height: 60px; max-height: 280px; margin: 0 -4px; }
 .fc-op { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 6px; cursor: pointer; }

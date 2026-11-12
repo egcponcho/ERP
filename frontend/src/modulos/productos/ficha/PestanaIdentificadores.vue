@@ -3,7 +3,7 @@
 import { onMounted, ref } from 'vue'
 import { api } from '@/nucleo/api.js'
 import { avisar, avisarError } from '@/nucleo/avisos.js'
-import { catalogo } from '@/nucleo/catalogos.js'
+import { catalogo } from '@/modulos/productos/compartido/catalogos.js'
 import BotonConfirmar from '@/componentes/BotonConfirmar.vue'
 import Icono from '@/componentes/Icono.vue'
 import PanelEnLinea from '@/componentes/PanelEnLinea.vue'

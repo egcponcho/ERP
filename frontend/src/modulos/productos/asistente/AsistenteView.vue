@@ -5,9 +5,10 @@
 // reales antes de crear. El alta completa se guarda en una sola transacción.
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { api, CONFIG } from '@/nucleo/api.js'
+import { api } from '@/nucleo/api.js'
+import { CONFIG } from '@/modulos/productos/compartido/api.js'
 import { avisar, avisarError } from '@/nucleo/avisos.js'
-import { catalogo, invalidarCatalogo } from '@/nucleo/catalogos.js'
+import { catalogo, invalidarCatalogo } from '@/modulos/productos/compartido/catalogos.js'
 import Asistente from '@/componentes/Asistente.vue'
 import Icono from '@/componentes/Icono.vue'
 import { b, cargarBorrador, claveCombinacion, combinaciones, descartarBorrador, guardarBorrador, nuevoBorrador } from './borrador.js'

@@ -1,5 +1,5 @@
 <script setup>
-import { t, tx } from '@/nucleo/texto.js'
+import { t } from '@/nucleo/texto.js'
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { avisar } from '@/nucleo/avisos.js'
 import { guardarVistas, preferencias } from '@/nucleo/preferencias.js'
@@ -45,10 +45,10 @@ async function crear() {
   const nombre = (nueva.value?.nombre || '').trim()
   if (!nombre) return
   const otras = vistas.value.filter((v) => v.nombre.toLowerCase() !== nombre.toLowerCase())
-  if (guardar([...otras, { nombre, query: limpio(props.actual) }], t('View “{0}” saved.', [nombre]))) { nueva.value = null; cerrar() }
+  if (guardar([...otras, { nombre, query: limpio(props.actual) }], t('Vista «{0}» guardada.', [nombre]))) { nueva.value = null; cerrar() }
 }
 function quitar(v) {
-  guardar(vistas.value.filter((x) => x !== v), t('View “{0}” deleted.', [v.nombre]))
+  guardar(vistas.value.filter((x) => x !== v), t('Vista «{0}» borrada.', [v.nombre]))
 }
 function elegir(v) {
   cerrar()
@@ -59,24 +59,24 @@ function elegir(v) {
 <template>
   <div ref="raiz" class="vistas-guardadas" @keydown.esc="cerrar">
     <button type="button" class="btn" :aria-expanded="abierto" aria-haspopup="true" @click="alternar">
-      <Icono nombre="lista" :tam="15" />{{ tx(activa ? activa.nombre : t('Saved views')) }}<Icono nombre="abajo" :tam="13" />
+      <Icono nombre="lista" :tam="15" />{{ activa ? activa.nombre : t('Vistas guardadas') }}<Icono nombre="abajo" :tam="13" />
     </button>
     <div v-if="abierto" v-flotante class="vg-menu" role="menu">
-      <p v-if="!vistas.length" class="ayuda vg-vacio">{{ t('Save the filters you use often to come back to them in one click.') }}</p>
+      <p v-if="!vistas.length" class="ayuda vg-vacio">{{ t('Guarde los filtros que usa seguido para volver a ellos con un clic.') }}</p>
       <div v-for="v in vistas" :key="v.nombre" class="vg-fila" :class="{ activa: activa === v }">
-        <button type="button" class="vg-elegir" role="menuitem" @click="elegir(v)">{{ tx(v.nombre) }}</button>
-        <button type="button" class="btn-icono" :aria-label="t('Delete view {0}', [v.nombre])" :disabled="ocupado" @click="quitar(v)"><Icono nombre="basura" :tam="14" /></button>
+        <button type="button" class="vg-elegir" role="menuitem" @click="elegir(v)">{{ v.nombre }}</button>
+        <button type="button" class="btn-icono" :aria-label="t('Borrar la vista {0}', [v.nombre])" :disabled="ocupado" @click="quitar(v)"><Icono nombre="basura" :tam="14" /></button>
       </div>
       <form v-if="nueva" class="vg-form" @submit.prevent="crear">
-        <input v-model="nueva.nombre" class="entrada entrada-chica" type="text" maxlength="60" :aria-label="t('Name of the view')"
+        <input v-model="nueva.nombre" class="entrada entrada-chica" type="text" maxlength="60" :aria-label="t('Nombre de la vista')"
                placeholder="Ej.: Calzado activo" autofocus />
         <div class="fila-flex">
-          <button class="btn btn-chico btn-fantasma" type="button" @click="nueva = null">{{ t('Cancel') }}</button>
-          <button class="btn btn-chico btn-primario" type="submit" :disabled="!nueva.nombre.trim()">{{ t('Save') }}</button>
+          <button class="btn btn-chico btn-fantasma" type="button" @click="nueva = null">{{ t('Cancelar') }}</button>
+          <button class="btn btn-chico btn-primario" type="submit" :disabled="!nueva.nombre.trim()">{{ t('Guardar') }}</button>
         </div>
         <p class="ayuda">Guarda los filtros, el orden y las columnas de ahora.</p>
       </form>
-      <button v-else type="button" class="btn btn-chico vg-nueva" role="menuitem" @click="nueva = { nombre: '' }"><Icono nombre="mas" :tam="14" />{{ t('Save current filters as a view') }}</button>
+      <button v-else type="button" class="btn btn-chico vg-nueva" role="menuitem" @click="nueva = { nombre: '' }"><Icono nombre="mas" :tam="14" />{{ t('Guardar los filtros actuales como vista') }}</button>
     </div>
   </div>
 </template>
